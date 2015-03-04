@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PokerSquares</string>
+    <string name="action_settings">Settings</string>
+    <string name="card_description">This is one of the 25 cards on the screen for you to interact with</string>
+    <string name="zero_default"> 0</string>
+    <string name="total">Total: </string>
+    <string name="new_game">New Game </string>
+    <string name="Continue">Continue </string>
+    <string name="poker_squares">Poker Squares</string>
+    <string name="about">About</string>
+    <string name="stats">Stats</string>
+    <string name="mute">Mute</string>
+	<color  name="green">#006633</color>
+	<color  name="black">#1b1b1b</color>
+	<color  name="white">#FFFFFF</color>
+</resources>

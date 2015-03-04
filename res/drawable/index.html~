@@ -1,0 +1,112 @@
+<HTML>
+<HEAD>
+<META  NAME="description" CONTENT="A full deck of Playing Card Icons">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META NAME="keywords" CONTENT="Playing Cards, deck of cards, deck, cards, icons, images">
+<TITLE>Playing Cards</TITLE>
+</HEAD>
+<BODY BGCOLOR=#2a2a2a  TEXT=#e1ffd7 LINK=#FFFFFF VLINK=#FFFFFF>
+<CENTER>
+<TABLE BORDER=0 CELLSPACING=10 CELLPADDING=10>
+<TR>
+<TD>
+<IMG SRC="bluetop.png"><BR>
+<IMG SRC="topbhor.png"><BR>
+<IMG SRC="bluebottom.png"><BR>
+</TD>
+<TD>
+<IMG SRC="blueleft.png">
+<IMG SRC="topbvert.png">
+<IMG SRC="blueright.png">
+</TD>
+<TD><IMG SRC="rjoker.png"></TD>
+<TD VALIGN=CENTER><STRONG>Playing Cards</STRONG></TD>
+<TD><IMG SRC="bjoker.png"></TD>
+<TD>
+<IMG SRC="redtop.png"><BR>
+<IMG SRC="toprhor.png"><BR>
+<IMG SRC="redbottom.png"><BR>
+</TD>
+<TD>
+<IMG SRC="redleft.png">
+<IMG SRC="toprvert.png">
+<IMG SRC="redright.png">
+</TD>
+</TR>
+<TR></TR>
+</TABLE>
+<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0>
+<TR>
+<TD ALIGN=CENTER><IMG SRC="aceclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="deuceclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="threeclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fourclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fiveclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sixclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sevenclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="eightclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="nineclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="tenclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="jackclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="queenclubs.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="kingclubs.png"></TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER><IMG SRC="acehearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="deucehearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="threehearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fourhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fivehearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sixhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sevenhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="eighthearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="ninehearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="tenhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="jackhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="queenhearts.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="kinghearts.png"></TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER><IMG SRC="acespades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="deucespades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="threespades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fourspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fivespades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sixspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sevenspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="eightspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="ninespades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="tenspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="jackspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="queenspades.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="kingspades.png"></TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER><IMG SRC="acediamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="deucediamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="threediamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fourdiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="fivediamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sixdiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="sevendiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="eightdiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="ninediamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="tendiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="jackdiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="queendiamonds.png"></TD>
+<TD ALIGN=CENTER><IMG SRC="kingdiamonds.png"></TD>
+</TR>
+
+</TABLE>
+
+<TABLE BORDER=0 CELLSPACING=10>
+<TR>
+<TD ALIGN=CENTER><FONT SIZE=2><BR>
+<TD><IMG SRC="no.bmp"></TD>
+<TD><IMG SRC="mystery.png"></TD>
+
+</FONT></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

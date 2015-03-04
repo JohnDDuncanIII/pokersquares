@@ -24,7 +24,7 @@ Current Development Screenshots
 
 Development log
 -------------------------------
-[Google Drive]https://docs.google.com/document/d/1IlG0awZ08vFTgvLV1TF7pDqElKd46GGcyhpRWvf3BnA/edit?usp=sharing
+[Google Drive](https://docs.google.com/document/d/1IlG0awZ08vFTgvLV1TF7pDqElKd46GGcyhpRWvf3BnA/edit?usp=sharing)
 
 ==========
 

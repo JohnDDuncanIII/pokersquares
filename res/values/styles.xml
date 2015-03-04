@@ -8,7 +8,7 @@
   </style>
   
   <style name="app_theme1" parent="android:Theme">
-    <item name="android:windowBackground">@drawable/app_background1</item>
+    <item name="android:windowBackground">@drawable/app_background</item>
     <item name="android:listViewStyle">@style/TransparentListView</item>
     <item name="android:expandableListViewStyle">@style/TransparentExpandableListView</item>
   </style>

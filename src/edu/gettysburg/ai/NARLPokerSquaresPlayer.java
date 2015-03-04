@@ -143,6 +143,9 @@ public class NARLPokerSquaresPlayer implements MCPokerSquaresPlayer {
 
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
+		if(numPlays==25)
+			System.exit(0);
+		
 		int suit = card.getSuit();	
 
 		// match simDeck to event

@@ -1,17 +1,22 @@
 package edu.gettysburg.pokersquares;
 
-
+/*
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+ */
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,8 +32,17 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Color;
+/*
+import android.content.res.AssetManager;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.widget.LinearLayout;
+*/
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,65 +60,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private ImageView  					deckView;
 	private Card 			  			currentDeckCard;
 	private Card[][] 					array   = new Card[5][5];
-	private int 						moves   = 0;
+	private int 						moves   = 0, gameTotal = 0;//, highestScore;
 	private boolean 					isMuted = false;
 	private MediaPlayer 				mp      = new MediaPlayer();
 	private String						userName;
-	//private AAFinalPokerSquarePlayer player = new AAFinalPokerSquarePlayer();
+	newPokerSquares computer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-
-		//startService(new Intent(this, bgService.class));
-		//stopService(new Intent(this, bgService.class));
+		
+		
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
 
-
-		/*
-		AssetManager am = this.getAssets();
-		try {
-			FileInputStream fis = new FileInputStream(mapFile);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			absMap = (HashMap<String, NARLPokerSquaresPlayer.RLNode>) ois.readObject();
-			InputStream is = am.open("test.txt");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-
-		/*
-		File temp;
-		try {
-			temp = File.createTempFile("i-am-a-temp-file", ".tmp" );
-			String absolutePath = temp.getAbsolutePath();
-		 	System.out.println("File path : " + absolutePath);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-
-		//File newFile = new File("narl.dat");
-		//System.out.println(newFile.isFile());
-		//System.out.println(this.getFilesDir());
-
-		/**
-		 * This thread reserved for AI player for now...
-		 * The final, expectimax, and all other players will run, 
-		 * but run into garbage collection and time out since they are apparently extremely memory intensive...
-		 */
-		new Thread(new Runnable() {
-			public void run() {
-				Thread.yield();
-	
-				//ExpectimaxNARLPokerSquaresPlayer3 player = new ExpectimaxNARLPokerSquaresPlayer3(21);
-				//AAFinalPokerSquarePlayer.start();
-
-			}}).start();
-		
 		// Get userName from SplashScreen activity
 		Bundle bundle = getIntent().getExtras();
 		userName = bundle.getString("userName");
@@ -121,10 +92,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 		// Initialize card deck, then shuffle it (arbitrarily) three times to ensure randomness
 		deck 			 = Card.initialize();
-		Collections.shuffle(deck);
-		Collections.shuffle(deck);
-		Collections.shuffle(deck);
 
+		Collections.shuffle(deck);
+		//Collections.shuffle(deck);
+		//Collections.shuffle(deck);
+
+		@SuppressWarnings("unchecked")
+		Stack<Card> deckCopy = (Stack<Card>) deck.clone();
+		NARLPokerSquaresPlayer player = new NARLPokerSquaresPlayer();
+		computer = new newPokerSquares(player, 60000, edu.gettysburg.ai.Card.interpret(deckCopy));
+
+		//startService(new Intent(this, bgService.class).putExtra("deck", deck));
+		
 		// For clarity on colored backgrounds...
 		textTotal.setShadowLayer(7, 0, 0, Color.BLACK);
 		textTotalString.setShadowLayer(7, 0, 0, Color.BLACK);
@@ -149,11 +128,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		deckView.setImageResource(resourceID);
 	}
 
+	public void setImagesAfterRestore(String viewID) {
+
+	}
+
 	/**
 	 * The method that is called each time any ImageView is pressed in the program. 
 	 */
 	@Override
 	public void onClick(View v) {
+		
+		computer.nextMove();
+		// play simple sound when placing card on the table. short and succinct
 		playPlace();
 		// Set the currentView equal to the currently pressed ImageView
 		ImageView currentView = map.get(getResources().getResourceEntryName(v.getId()));
@@ -220,18 +206,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		}
 
 		// Sort all of the temporary lists (since our Card class implements Comparable)
-		for (int i=0; i<places.size(); i++){
+		for (int i=0; i<places.size(); i++) {
 			Collections.sort(places.get(i));
 		}
 
-		/* // Output the text representation of the sorted card arrays. For debug purposes -- Delete before final release.
+		/* 
+		 * // DEBUG: Output the text representation of the sorted card arrays. For debug purposes -- Delete before final release.
 		for(int i=0; i<places.size(); i++) {
 			for(int k=0; k<places.get(i).size(); k++) {
 				System.out.print(places.get(i).get(k) + " ");
 			}
 			System.out.println();
 		}
-		 */
+		*/
 	}
 
 	/**
@@ -251,6 +238,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			public void onClick(DialogInterface dialog, int id) {
 				// Finish the current Intent, and start over
 				Intent intent = getIntent();
+				killAI();
 				finish();
 				startActivity(intent);
 			}
@@ -270,6 +258,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		alert.show();
 	}
 
+	private void killAI() {
+		stopService(new Intent(this, bgService.class));
+	}
+	
 	/**
 	 * Play the place sound when a user clicks on a click-able ImageView. 
 	 * For Reference: Sound defined in res/raw/cardplace.wav
@@ -341,7 +333,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		for(int i=0; i<places.size(); i++) {
 			total+=Integer.parseInt(String.valueOf(textMap.get("view"+ i).getText()));
 		}
-		textTotal.setText(String.valueOf(total));
+		gameTotal = total;
+		textTotal.setText(String.valueOf(gameTotal));
 	}
 
 	/**
@@ -353,6 +346,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		intent.addCategory(Intent.CATEGORY_HOME);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
+		killAI();
 		finish();
 	}
 
@@ -366,11 +360,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		super.onSaveInstanceState(outState);
 
 		/*
+		for (HashMap.Entry<String, ImageView> entry : map.entrySet()) {
+		    int id = entry.getValue().getId();
+		}
+		 */
+
+
+		/*
 		outState.putSerializable("deck", deck);
 		outState.putSerializable("places", places);
 		outState.putSerializable("map", map);
 		outState.putSerializable("textMap", textMap);
-		outState.putString("textTotal", textTotal.getText().toString());
+		outState.putSerializable("textTotal", textTotal.getText().toString());
 		outState.putSerializable("array", array);
 		outState.putSerializable("currentDeckCard", currentDeckCard);
 		outState.putInt("moves", moves);
@@ -390,6 +391,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
+
+		/*
+		deck = (Stack<Card>) savedInstanceState.getSerializable("deck");
+		places = (ArrayList<List<Card>>) savedInstanceState.getSerializable("places");
+		map = (HashMap<String, ImageView>) savedInstanceState.getSerializable("map");
+		textMap = (HashMap<String, TextView>) savedInstanceState.getSerializable("textMap");
+		textTotal.setText(savedInstanceState.getString("textTotal"));
+		array = (Card[][]) savedInstanceState.getSerializable("array");
+		currentDeckCard = (Card) savedInstanceState.getSerializable("currentDeckCard");
+		moves = savedInstanceState.getInt("moves");
+		isMuted =  savedInstanceState.getBoolean("isMuted");
+		userName = savedInstanceState.getString("userName");
+		 */
+
 
 		/*
 		setNumReds(savedInstanceState.getInt("textViewNumReds", 0));
@@ -447,4 +462,63 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		getMenuInflater().inflate(R.menu.my_options_menu, menu);
 		return true;
 	}
+	/*
+	private void scaleImage()
+	{
+	    // Get the ImageView and its bitmap
+	    ImageView view = (ImageView) findViewById(R.id.r1c1);
+	    Drawable drawing = view.getDrawable();
+	    if (drawing == null) {
+	        return; // Checking for null & return, as suggested in comments
+	    }
+	    Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+	    // Get current dimensions AND the desired bounding box
+	    int width = bitmap.getWidth();
+	    int height = bitmap.getHeight();
+	    int bounding = dpToPx(250);
+	    Log.i("Test", "original width = " + Integer.toString(width));
+	    Log.i("Test", "original height = " + Integer.toString(height));
+	    Log.i("Test", "bounding = " + Integer.toString(bounding));
+
+	    // Determine how much to scale: the dimension requiring less scaling is
+	    // closer to the its side. This way the image always stays inside your
+	    // bounding box AND either x/y axis touches it.  
+	    float xScale = ((float) bounding) / width;
+	    float yScale = ((float) bounding) / height;
+	    float scale = (xScale <= yScale) ? xScale : yScale;
+	    Log.i("Test", "xScale = " + Float.toString(xScale));
+	    Log.i("Test", "yScale = " + Float.toString(yScale));
+	    Log.i("Test", "scale = " + Float.toString(scale));
+
+	    // Create a matrix for the scaling and add the scaling data
+	    Matrix matrix = new Matrix();
+	    matrix.postScale(scale, scale);
+
+	    // Create a new bitmap and convert it to a format understood by the ImageView 
+	    Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+	    width = scaledBitmap.getWidth(); // re-use
+	    height = scaledBitmap.getHeight(); // re-use
+	    BitmapDrawable result = new BitmapDrawable(scaledBitmap);
+	    Log.i("Test", "scaled width = " + Integer.toString(width));
+	    Log.i("Test", "scaled height = " + Integer.toString(height));
+
+	    // Apply the scaled bitmap
+	    view.setImageDrawable(result);
+
+	    // Now change ImageView's dimensions to match the scaled image
+	    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) view.getLayoutParams(); 
+	    params.width = width;
+	    params.height = height;
+	    view.setLayoutParams(params);
+
+	    Log.i("Test", "done");
+	}
+
+	private int dpToPx(int dp)
+	{
+	    float density = getApplicationContext().getResources().getDisplayMetrics().density;
+	    return Math.round((float)dp * density);
+	}
+	 */
 }

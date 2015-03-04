@@ -3,6 +3,7 @@ package edu.gettysburg.ai;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
@@ -53,6 +54,7 @@ public class PokerSquares {
 	private boolean verbose = true; // whether or not to print move-by-move transcript of the game
 	private Card[][] grid = new Card[SIZE][SIZE]; // current game grid
 	private Random random = new Random(); // current game random number generator
+	private Stack<edu.gettysburg.pokersquares.Card> inCards;
 	
 	/**
 	 * @param player Poker Squares player object
@@ -75,6 +77,8 @@ public class PokerSquares {
 		for (Card card : Card.allCards)
 			deck.push(card);
 		Collections.shuffle(deck, random);
+		
+		
 		
 		// clear grid
 		for (int row = 0; row < SIZE; row++)
@@ -416,12 +420,13 @@ public class PokerSquares {
 	    //new PokerSquares(new WeiAndMattCorrectVersion(), GAME_MILLIS).playSequence(1000, 967313920, false);
 	    //Score Mean: 119.146000, Standard Deviation: 29.415552, Minimum: 39, Maximum: 221
 
-	    new PokerSquares(new PlayerEx(), GAME_MILLIS).playSequence(1000, 967313920, false);
+	    //new PokerSquares(new PlayerEx(), GAME_MILLIS).playSequence(1000, 967313920, false);
+	    //new PokerSquares(new PlayerEx(), GAME_MILLIS).playSequence(1, 967313920, false);
 
 	    //new PokerSquares(new AAFinalPokerSquarePlayer(), GAME_MILLIS).playSequence(1000, 967313920, false);
 	    //Score Mean: 119.023000, Standard Deviation: 30.050565, Minimum: 29, Maximum: 246
 
-	    //new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1000, 967313920, false);
+	    //new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1, 100, false);
 	    //Score Mean: 113.367000, Standard Deviation: 27.947134, Minimum: 58, Maximum: 232
 
 	    //new PokerSquares(new Marcin_GreedyPlayer(), GAME_MILLIS).playSequence(1000, 967313920, false);
@@ -442,5 +447,9 @@ public class PokerSquares {
 	    //new PokerSquares(new ExpectimaxNARLPokerSquaresPlayer3(21), GAME_MILLIS).playSequence(1000, 967313920, false);
 	    //Score Mean: 124.815000, Standard Deviation: 30.622064, Minimum: 50, Maximum: 252
 
+	}
+	public static void start(){
+		//new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1, 967313920, false);
+		//new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1, 100, false);
 	}
 }

@@ -21,16 +21,16 @@
             android:layout_width="54dp"
             android:layout_height="72dp"
             android:background="#80000000"
-            android:src="@drawable/topbvert" 
-            android:contentDescription="@string/card_description"/>
+            android:contentDescription="@string/card_description"
+            android:src="@drawable/topbvert" />
         
         <ImageView
             android:id="@+id/r1c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
             android:background="#80000000"
-            android:src="@drawable/toprvert"
-			android:contentDescription="@string/card_description"/>
+            android:contentDescription="@string/card_description"
+            android:src="@drawable/toprvert" />
         
         <ImageView
             android:id="@+id/r1c3"

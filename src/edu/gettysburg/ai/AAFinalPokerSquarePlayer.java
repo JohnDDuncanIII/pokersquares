@@ -93,6 +93,6 @@ public class AAFinalPokerSquarePlayer implements PokerSquaresPlayer{
 
 	}
 	public static void start(){
-		new PokerSquares(new AAFinalPokerSquarePlayer(), 60000L).play();
+		//new PokerSquares(new AAFinalPokerSquarePlayer(), 60000L).play();
 	}
 }

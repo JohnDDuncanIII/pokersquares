@@ -30,9 +30,15 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 /*
 import android.content.res.AssetManager;
 import android.content.Context;
@@ -45,6 +51,7 @@ import android.widget.LinearLayout;
 */
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -54,8 +61,8 @@ import edu.gettysburg.ai.*;
 public class MainActivity extends Activity implements View.OnClickListener {
 	private Stack<Card> 				deck; 
 	private ArrayList<List<Card>> 		places  = new ArrayList<List<Card>>();
-	private HashMap<String, ImageView> map    	= new HashMap<String, ImageView>();
-	private HashMap<String, TextView>  textMap = new HashMap<String, TextView>();
+	private HashMap<String, ImageView>  map    	= new HashMap<String, ImageView>();
+	private HashMap<String, TextView>   textMap = new HashMap<String, TextView>();
 	private TextView					textTotal, textTotalString;
 	private ImageView  					deckView;
 	private Card 			  			currentDeckCard;
@@ -71,31 +78,34 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		
-		
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
-
-
+		
 		// Get userName from SplashScreen activity
 		Bundle bundle = getIntent().getExtras();
 		userName = bundle.getString("userName");
 
+		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
 		// Get resources for all of the vertical + horizontal textViews, then add it to the hashMap of textViews using its ID as the key
 		for(int i=0; i<=9; i++) {
 			int resourceID 	= getResources().getIdentifier("view"+i, "id", getPackageName());
 			TextView toAdd = (TextView) findViewById(resourceID);
+			if(i>=5) toAdd.setWidth(70);
+			toAdd.getPaint().setAntiAlias(false);
+			toAdd.setTypeface(tf);
 			textMap.put("view"+i, toAdd);
 		}
+		
+		View tmp = (View) findViewById (getResources().getIdentifier("linearlayout0", "id", getPackageName()));
+		tmp.setPadding(75, 0, 0, 0);
 
 		textTotal 		 = (TextView) findViewById(R.id.textTotal);
+		textTotal.setTypeface(tf);
 		textTotalString  = (TextView) findViewById(R.id.textTotalString);
 
 		// Initialize card deck, then shuffle it (arbitrarily) three times to ensure randomness
 		deck 			 = Card.initialize();
 
 		Collections.shuffle(deck);
-		//Collections.shuffle(deck);
-		//Collections.shuffle(deck);
 
 		@SuppressWarnings("unchecked")
 		Stack<Card> deckCopy = (Stack<Card>) deck.clone();
@@ -108,14 +118,30 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		textTotal.setShadowLayer(7, 0, 0, Color.BLACK);
 		textTotalString.setShadowLayer(7, 0, 0, Color.BLACK);
 
-		// Get resources for all of the ImageViews, set their onClickListener, and then add them to them hashMap of ImageViews using its ID as the key
+		// so we can initialize the card faces with a cool pattern
+		int counter = 2;
+		// Get resources for all of the ImageViews, set their onClickListener, 
+		//    and then add them to them hashMap of ImageViews using its ID as the key
 		for(int r=1; r<6; r++) {
 			for(int c=1; c<6; c++) {
 				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
 				ImageView toAdd = (ImageView) findViewById(resourceID);
 				toAdd.setOnClickListener(this);
 				map.put("r" + r + "c" + c, toAdd);
-				//map.get("r" + r + "c" + c).setOnClickListener(this);
+				
+				// dope ternary - you = jealous 
+				Bitmap initialBmp = counter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
+					BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
+				
+				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
+				BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
+				initialCur.setAntiAlias(false);
+				toAdd.getLayoutParams().height = initialBmp.getHeight();
+				toAdd.getLayoutParams().width = initialBmp.getWidth();
+				toAdd.requestLayout();
+				
+				toAdd.setImageDrawable(initialCur);
+				counter++;
 			}
 		}
 
@@ -125,11 +151,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		String fileName = currentDeckCard.toString();
 		fileName		= fileName.toLowerCase(Locale.getDefault());
 		int resourceID  = getResources().getIdentifier(fileName, "drawable", getPackageName());
-		deckView.setImageResource(resourceID);
-	}
-
-	public void setImagesAfterRestore(String viewID) {
-
+		
+		Bitmap deckBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
+		deckBmp = Bitmap.createScaledBitmap(deckBmp, deckBmp.getWidth(), deckBmp.getHeight(), false); 
+		BitmapDrawable deckCur = new BitmapDrawable(this.getResources(), deckBmp);
+		deckCur.setAntiAlias(false);
+		
+		deckView.getLayoutParams().height = deckBmp.getHeight();
+		deckView.getLayoutParams().width = deckBmp.getWidth();
+		deckView.requestLayout();
+		deckView.setImageDrawable(deckCur);
 	}
 
 	/**
@@ -137,7 +168,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	 */
 	@Override
 	public void onClick(View v) {
-		
+		// System.out.println("PX :" + dpFromPx(this, 71));
+		// System.out.println("PX :" + dpFromPx(this, 96));
+		// increment computer move by one
 		computer.nextMove();
 		// play simple sound when placing card on the table. short and succinct
 		playPlace();
@@ -153,16 +186,42 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		int col 			  = Integer.parseInt(imageViewName.substring(3,4)) - 1;
 		array[row][col]		  = currentDeckCard;
 
+		// since we are using Bitmap playing cards (thanks Susan Kare), 
+		//    we have to ensure that they will NOT be anti-aliased
+		Bitmap gridBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
+		gridBmp = Bitmap.createScaledBitmap(gridBmp, gridBmp.getWidth(), gridBmp.getHeight(), false); 
+		
+		//currentView.setImageBitmap(gridBmp);
 		// Set the actual image of the ImageView in the program to the resource
-		currentView.setImageResource(resourceID);
+		//currentView.setImageResource(resourceID);
+		
+		BitmapDrawable bdCur = new BitmapDrawable(this.getResources(), gridBmp);
+		bdCur.setAntiAlias(false);
+		
+		currentView.getLayoutParams().height = gridBmp.getHeight();
+		currentView.getLayoutParams().width = gridBmp.getWidth();
+		currentView.requestLayout();
+		
+		currentView.setImageDrawable(bdCur);
 		currentView.setClickable(false);
 
+		
 		// Get the next card in the deck and make it the next card in the deckView
 		currentDeckCard 	  = deck.pop();
 		fileName 			  = currentDeckCard.toString();
 		fileName 			  = fileName.toLowerCase(Locale.getDefault());
 		resourceID  		  = getResources().getIdentifier(fileName, "drawable", getPackageName());
-		deckView.setImageResource(resourceID);
+		
+		Bitmap bmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
+		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth(), bmp.getHeight(), false); 
+		BitmapDrawable bd = new BitmapDrawable(this.getResources(), bmp);
+		bd.setAntiAlias(false);
+		
+		deckView.getLayoutParams().height = bmp.getHeight();
+		deckView.getLayoutParams().width = bmp.getWidth();
+		deckView.requestLayout();
+		deckView.setImageDrawable(bd);
+		
 		moves++;
 		updateArray();
 		checkScoreUpdateLabels();
@@ -173,7 +232,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			endGame();
 		}
 	}
-
+	
 	/**
 	 * Uses a temporary List to gather elements from the master array[][]  
 	 * Puts List into the master ArrayList of Lists in order for computation purposes for the scoring
@@ -284,6 +343,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 					mp.start();
 				}}}).start();
 	}
+	
 	/**
 	 * Check the scoring value of each of the Lists in the places ArrayList instance variable. 
 	 * Could easily implement a British scoring system option in the future...
@@ -314,7 +374,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			else if(tmp.size()>=3 && Card.hasThreeOfAKind(tmp)) {
 				sectionTotal+=10;
 			}
-			else if(tmp.size()>=4 && Card.hasTwoPair(tmp)) {
+			else if(tmp.size()>=4 && Card.hasTwoPair(tmp, tmp.size())) {
 				sectionTotal+=5;
 			}
 			else if(tmp.size()>=2 && Card.hasPair(tmp)) {
@@ -350,39 +410,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		finish();
 	}
 
-
 	/**
 	 * Save instance variables for when the application is tilted to either landscape or portrait mode 
 	 */
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-
-		/*
-		for (HashMap.Entry<String, ImageView> entry : map.entrySet()) {
-		    int id = entry.getValue().getId();
-		}
-		 */
-
-
-		/*
-		outState.putSerializable("deck", deck);
-		outState.putSerializable("places", places);
-		outState.putSerializable("map", map);
-		outState.putSerializable("textMap", textMap);
-		outState.putSerializable("textTotal", textTotal.getText().toString());
-		outState.putSerializable("array", array);
-		outState.putSerializable("currentDeckCard", currentDeckCard);
-		outState.putInt("moves", moves);
-		outState.putBoolean("isMuted", isMuted);
-		outState.putString("userName", userName);
-		 */
-
-		/*
-	private ImageView  					deckView;
-	private MediaPlayer 				mp      = new MediaPlayer();
-		 */
 	}
 
 	/**
@@ -391,38 +424,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-
-		/*
-		deck = (Stack<Card>) savedInstanceState.getSerializable("deck");
-		places = (ArrayList<List<Card>>) savedInstanceState.getSerializable("places");
-		map = (HashMap<String, ImageView>) savedInstanceState.getSerializable("map");
-		textMap = (HashMap<String, TextView>) savedInstanceState.getSerializable("textMap");
-		textTotal.setText(savedInstanceState.getString("textTotal"));
-		array = (Card[][]) savedInstanceState.getSerializable("array");
-		currentDeckCard = (Card) savedInstanceState.getSerializable("currentDeckCard");
-		moves = savedInstanceState.getInt("moves");
-		isMuted =  savedInstanceState.getBoolean("isMuted");
-		userName = savedInstanceState.getString("userName");
-		 */
-
-
-		/*
-		setNumReds(savedInstanceState.getInt("textViewNumReds", 0));
-		setNumGreens(savedInstanceState.getInt("textViewNumGreens", 0));
-		setUserScore(savedInstanceState.getInt("userScore", 0));
-		setComputerScore(savedInstanceState.getInt("computerScore", 0));
-		setTurnTotal(savedInstanceState.getInt("turnTotal", 0));
-		setImage(savedInstanceState.getString("imageName"));
-		setUserName(savedInstanceState.getString("userName"));
-		redsDrawn=savedInstanceState.getInt("redsDrawn");
-		greensDrawn=savedInstanceState.getInt("greensDrawn");
-		bag=savedInstanceState.getBooleanArray("bag");
-		chipIndex=savedInstanceState.getInt("chipIndex");
-		editTextEnteredText.setText(savedInstanceState.getString("editTextEnteredText"));
-		userStartGame = savedInstanceState.getBoolean("userStartGame", true);
-		isUserTurn = savedInstanceState.getBoolean("isUserTurn", true);
-		setButtonsState();
-		 */
 	}
 
 	/**
@@ -456,69 +457,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	public boolean onTouchEvent(MotionEvent event) {
+	    int action = event.getAction();
+	    switch(action & MotionEvent.ACTION_MASK) {
+	        case MotionEvent.ACTION_POINTER_DOWN:
+	            // multi-touch!! - touch down
+	            int count = event.getPointerCount(); // Number of 'fingers' in this time
+	            break;
+	    }
+	    return true;
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.my_options_menu, menu);
 		return true;
 	}
+	
 	/*
-	private void scaleImage()
-	{
-	    // Get the ImageView and its bitmap
-	    ImageView view = (ImageView) findViewById(R.id.r1c1);
-	    Drawable drawing = view.getDrawable();
-	    if (drawing == null) {
-	        return; // Checking for null & return, as suggested in comments
-	    }
-	    Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-
-	    // Get current dimensions AND the desired bounding box
-	    int width = bitmap.getWidth();
-	    int height = bitmap.getHeight();
-	    int bounding = dpToPx(250);
-	    Log.i("Test", "original width = " + Integer.toString(width));
-	    Log.i("Test", "original height = " + Integer.toString(height));
-	    Log.i("Test", "bounding = " + Integer.toString(bounding));
-
-	    // Determine how much to scale: the dimension requiring less scaling is
-	    // closer to the its side. This way the image always stays inside your
-	    // bounding box AND either x/y axis touches it.  
-	    float xScale = ((float) bounding) / width;
-	    float yScale = ((float) bounding) / height;
-	    float scale = (xScale <= yScale) ? xScale : yScale;
-	    Log.i("Test", "xScale = " + Float.toString(xScale));
-	    Log.i("Test", "yScale = " + Float.toString(yScale));
-	    Log.i("Test", "scale = " + Float.toString(scale));
-
-	    // Create a matrix for the scaling and add the scaling data
-	    Matrix matrix = new Matrix();
-	    matrix.postScale(scale, scale);
-
-	    // Create a new bitmap and convert it to a format understood by the ImageView 
-	    Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-	    width = scaledBitmap.getWidth(); // re-use
-	    height = scaledBitmap.getHeight(); // re-use
-	    BitmapDrawable result = new BitmapDrawable(scaledBitmap);
-	    Log.i("Test", "scaled width = " + Integer.toString(width));
-	    Log.i("Test", "scaled height = " + Integer.toString(height));
-
-	    // Apply the scaled bitmap
-	    view.setImageDrawable(result);
-
-	    // Now change ImageView's dimensions to match the scaled image
-	    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) view.getLayoutParams(); 
-	    params.width = width;
-	    params.height = height;
-	    view.setLayoutParams(params);
-
-	    Log.i("Test", "done");
+	public static float pxFromDp(final Context context, final float dp) {
+	    return dp * context.getResources().getDisplayMetrics().density;
 	}
-
-	private int dpToPx(int dp)
-	{
-	    float density = getApplicationContext().getResources().getDisplayMetrics().density;
-	    return Math.round((float)dp * density);
+	
+	public static float dpFromPx(final Context context, final float px) {
+	    return px / context.getResources().getDisplayMetrics().density;
 	}
-	 */
+	
+	public void setImagesAfterRestore(String viewID) {
+
+	}
+	*/
 }

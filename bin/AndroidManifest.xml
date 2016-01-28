@@ -4,9 +4,15 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <supports-screens android:smallScreens="true" 
+          android:normalScreens="true" 
+          android:largeScreens="true"
+          android:xlargeScreens="true"
+          android:anyDensity="true" />
+    
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:minSdkVersion="9"
+        android:targetSdkVersion="22" />
 
     <application
         android:allowBackup="true"

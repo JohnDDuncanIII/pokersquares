@@ -69,6 +69,7 @@ public class Card {
 		return this.rank == other.rank && this.suit == other.suit;		
 	}
 
+	// hack to convert professor Nellers card class to my card class
 	public static Stack<Card> interpret (Stack<edu.gettysburg.pokersquares.Card> cards) {
 		allCards = new Card[rankNames.length * suitNames.length];
 		for(int i=0; i<(rankNames.length * suitNames.length); i++){

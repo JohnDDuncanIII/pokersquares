@@ -12,7 +12,7 @@ Features
 APK Download
 -------------------------------
 
-Get it [here](https://github.com/nightyfurion/PokerSquares/blob/master/bin/PokerSquares.apk).
+Get it [here](https://github.com/JohnDDuncanIII/PokerSquares/blob/master/bin/PokerSquares.apk).
 
 Current Development Screenshots
 -------------------------------
@@ -22,9 +22,7 @@ Current Development Screenshots
 ![In Action](http://goput.it/bxpz.png)
 ![End Game](http://goput.it/mxsa.png)
 
-Development log
--------------------------------
-[Google Drive](https://docs.google.com/document/d/1IlG0awZ08vFTgvLV1TF7pDqElKd46GGcyhpRWvf3BnA/edit?usp=sharing)
+If using eclipse, right click on your java project and selecte Properties->Java Build Path->Libraries->Add External Jars
 
 ==========
 
@@ -32,6 +30,6 @@ Development log
 
 Sources
 -------------------------------
-### [Playing Cards Source](http://www.jfitz.com/cards/)
+### [Playing Cards](http://www.jfitz.com/cards/)
 ### [My playing cards (Edited)](http://cs.gettysburg.edu/~duncjo01/PlayingCards/)
 ### [Color Scheme Used for Playing Cards](http://clrs.cc/)

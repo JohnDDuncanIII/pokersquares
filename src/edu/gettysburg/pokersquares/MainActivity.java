@@ -28,6 +28,8 @@ import java.util.Stack;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
+import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -48,20 +50,22 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.LinearLayout;
-*/
+ */
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.gettysburg.ai.*;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener, OnTouchListener {
 	private Stack<Card> 				deck; 
 	private ArrayList<List<Card>> 		places  = new ArrayList<List<Card>>();
 	private HashMap<String, ImageView>  map    	= new HashMap<String, ImageView>();
+	private HashMap<String, ImageView>  computerMap    	= new HashMap<String, ImageView>();
 	private HashMap<String, TextView>   textMap = new HashMap<String, TextView>();
 	private TextView					textTotal, textTotalString;
 	private ImageView  					deckView;
@@ -73,13 +77,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private String						userName;
 	newPokerSquares computer;
 
+	// swipe stuff
+	private static final int NONE = 0;
+	private static final int SWIPE = 1;
+	private int mode = NONE;
+	private float startY;
+	private float stopY;
+	// We will only detect a swipe if the difference is at least 100 pixels
+	// Change this value to your needs
+	private static final int TRESHOLD = 100;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
-		
+
 		// Get userName from SplashScreen activity
 		Bundle bundle = getIntent().getExtras();
 		userName = bundle.getString("userName");
@@ -94,7 +108,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			toAdd.setTypeface(tf);
 			textMap.put("view"+i, toAdd);
 		}
-		
+
 		View tmp = (View) findViewById (getResources().getIdentifier("linearlayout0", "id", getPackageName()));
 		tmp.setPadding(75, 0, 0, 0);
 
@@ -113,7 +127,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		computer = new newPokerSquares(player, 60000, edu.gettysburg.ai.Card.interpret(deckCopy));
 
 		//startService(new Intent(this, bgService.class).putExtra("deck", deck));
-		
+
 		// For clarity on colored backgrounds...
 		textTotal.setShadowLayer(7, 0, 0, Color.BLACK);
 		textTotalString.setShadowLayer(7, 0, 0, Color.BLACK);
@@ -128,18 +142,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 				ImageView toAdd = (ImageView) findViewById(resourceID);
 				toAdd.setOnClickListener(this);
 				map.put("r" + r + "c" + c, toAdd);
-				
+
 				// dope ternary - you = jealous 
 				Bitmap initialBmp = counter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
 					BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
-				
+
 				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
 				BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
 				initialCur.setAntiAlias(false);
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				toAdd.requestLayout();
-				
+
 				toAdd.setImageDrawable(initialCur);
 				counter++;
 			}
@@ -151,12 +165,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		String fileName = currentDeckCard.toString();
 		fileName		= fileName.toLowerCase(Locale.getDefault());
 		int resourceID  = getResources().getIdentifier(fileName, "drawable", getPackageName());
-		
+
 		Bitmap deckBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
 		deckBmp = Bitmap.createScaledBitmap(deckBmp, deckBmp.getWidth(), deckBmp.getHeight(), false); 
 		BitmapDrawable deckCur = new BitmapDrawable(this.getResources(), deckBmp);
 		deckCur.setAntiAlias(false);
-		
+
 		deckView.getLayoutParams().height = deckBmp.getHeight();
 		deckView.getLayoutParams().width = deckBmp.getWidth();
 		deckView.requestLayout();
@@ -190,49 +204,52 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		//    we have to ensure that they will NOT be anti-aliased
 		Bitmap gridBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
 		gridBmp = Bitmap.createScaledBitmap(gridBmp, gridBmp.getWidth(), gridBmp.getHeight(), false); 
-		
+
 		//currentView.setImageBitmap(gridBmp);
 		// Set the actual image of the ImageView in the program to the resource
 		//currentView.setImageResource(resourceID);
-		
+
 		BitmapDrawable bdCur = new BitmapDrawable(this.getResources(), gridBmp);
 		bdCur.setAntiAlias(false);
-		
+
 		currentView.getLayoutParams().height = gridBmp.getHeight();
 		currentView.getLayoutParams().width = gridBmp.getWidth();
 		currentView.requestLayout();
-		
+
 		currentView.setImageDrawable(bdCur);
 		currentView.setClickable(false);
 
-		
+
 		// Get the next card in the deck and make it the next card in the deckView
 		currentDeckCard 	  = deck.pop();
 		fileName 			  = currentDeckCard.toString();
 		fileName 			  = fileName.toLowerCase(Locale.getDefault());
 		resourceID  		  = getResources().getIdentifier(fileName, "drawable", getPackageName());
-		
+
 		Bitmap bmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
 		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth(), bmp.getHeight(), false); 
 		BitmapDrawable bd = new BitmapDrawable(this.getResources(), bmp);
 		bd.setAntiAlias(false);
-		
+
 		deckView.getLayoutParams().height = bmp.getHeight();
 		deckView.getLayoutParams().width = bmp.getWidth();
 		deckView.requestLayout();
 		deckView.setImageDrawable(bd);
-		
+
 		moves++;
 		updateArray();
 		checkScoreUpdateLabels();
 		updateTotal();
+
+		//System.out.println("SHOWING COMPUTER GRID ITSELF");
+		showAI();
 
 		// When the game ends...
 		if(moves==25) {
 			endGame();
 		}
 	}
-	
+
 	/**
 	 * Uses a temporary List to gather elements from the master array[][]  
 	 * Puts List into the master ArrayList of Lists in order for computation purposes for the scoring
@@ -277,7 +294,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			}
 			System.out.println();
 		}
-		*/
+		 */
 	}
 
 	/**
@@ -320,7 +337,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private void killAI() {
 		stopService(new Intent(this, bgService.class));
 	}
-	
+
 	/**
 	 * Play the place sound when a user clicks on a click-able ImageView. 
 	 * For Reference: Sound defined in res/raw/cardplace.wav
@@ -343,7 +360,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 					mp.start();
 				}}}).start();
 	}
-	
+
 	/**
 	 * Check the scoring value of each of the Lists in the places ArrayList instance variable. 
 	 * Could easily implement a British scoring system option in the future...
@@ -457,16 +474,51 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
+	public boolean onTouch(View v, MotionEvent event)
+	{
+		switch (event.getAction() & MotionEvent.ACTION_MASK) {
+		case MotionEvent.ACTION_POINTER_DOWN:
+			// This happens when you touch the screen with two fingers
+			mode = SWIPE;
+			// You can also use event.getY(1) or the average of the two
+			startY = event.getY(0);
+			break;
+
+		case MotionEvent.ACTION_POINTER_UP:
+			// This happens when you release the second finger
+			mode = NONE;
+			if(Math.abs(startY - stopY) > TRESHOLD) {
+				if(startY > stopY) {
+					System.out.println("SWIPING UP");
+				}
+				else {
+					System.out.println("SWIPING DOWN");
+				}
+			}
+			this.mode = NONE;
+			v.performClick();
+			break;
+
+		case MotionEvent.ACTION_MOVE:
+			if(mode == SWIPE) {
+				stopY = event.getY(0);
+			}
+			break;
+		}
+
+		return true;
+	}
+
 	public boolean onTouchEvent(MotionEvent event) {
-	    int action = event.getAction();
-	    switch(action & MotionEvent.ACTION_MASK) {
-	        case MotionEvent.ACTION_POINTER_DOWN:
-	            // multi-touch!! - touch down
-	            int count = event.getPointerCount(); // Number of 'fingers' in this time
-	            break;
-	    }
-	    return true;
+		int action = event.getAction();
+		switch(action & MotionEvent.ACTION_MASK) {
+		case MotionEvent.ACTION_POINTER_DOWN:
+			// multi-touch!! - touch down
+			int count = event.getPointerCount(); // Number of 'fingers' in this time
+			break;
+		}
+		return true;
 	}
 
 	@Override
@@ -474,18 +526,77 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		getMenuInflater().inflate(R.menu.my_options_menu, menu);
 		return true;
 	}
-	
-	/*
-	public static float pxFromDp(final Context context, final float dp) {
-	    return dp * context.getResources().getDisplayMetrics().density;
-	}
-	
-	public static float dpFromPx(final Context context, final float px) {
-	    return px / context.getResources().getDisplayMetrics().density;
-	}
-	
-	public void setImagesAfterRestore(String viewID) {
 
+	public void showAI(){
+		edu.gettysburg.ai.Card[][] grid = computer.getGrid();
+
+		/*
+		for (int j = 0; j<grid[0].length; j++){
+			for (int i = 0; i<grid.length; i++){
+				System.out.println(grid[j][i]);
+			}
+		}
+		*/
+
+		//System.out.println(grid);
+
+		int internalCounter = 0;
+		int counter = 0;
+		// so we can initialize the card faces with a cool pattern
+		// Get resources for all of the ImageViews, set their onClickListener, 
+		//    and then add them to them hashMap of ImageViews using its ID as the key
+		for(int r=1; r<6; r++) {
+			internalCounter = 0;
+			for(int c=1; c<6; c++) {
+				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
+				ImageView toAdd = (ImageView) findViewById(resourceID);
+				toAdd.setOnClickListener(this);
+				computerMap.put("r" + r + "c" + c, toAdd);
+
+				Bitmap initialBmp = null;
+				
+				if(grid[counter][internalCounter] == null) {
+					initialBmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.toprbvert);
+				} else {
+					edu.gettysburg.ai.Card ca = grid[counter][internalCounter];
+					//System.out.println("RANK " + ca.getRank() + " SUIT: " + ca.getSuit());
+					
+					// reverse the interpret
+					int newRank = ca.getRank()-1;
+					if(ca.getRank()==0)
+						newRank = 12;
+					Card pca= new Card(Card.Rank.values()[newRank], Card.Suit.values()[ca.getSuit()]);
+					//System.out.println("NEW RANK: + " + pca.rank() + " SUIT: " + pca.suit());
+					
+					String fileName 	  = pca.toString();
+					fileName 			  = fileName.toLowerCase(Locale.getDefault());
+					int nResourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
+					// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
+			
+					
+					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
+				}
+				
+
+				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
+				BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
+				initialCur.setAntiAlias(false);
+				toAdd.getLayoutParams().height = initialBmp.getHeight();
+				toAdd.getLayoutParams().width = initialBmp.getWidth();
+				toAdd.requestLayout();
+
+				toAdd.setImageDrawable(initialCur);
+				internalCounter++;
+			}
+			counter++;
+		}
+		 
+
+		// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+		/*ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+		anim.setTarget(currentView);
+		anim.setDuration(1500);
+		anim.start();
+		 */
 	}
-	*/
 }

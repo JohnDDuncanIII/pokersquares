@@ -76,11 +76,16 @@ public class Card {
 			
 			edu.gettysburg.pokersquares.Card currentCard = cards.pop();
 			
+			
+
+			
 			int newRank = currentCard.rank().ordinal()+1;
 			if(currentCard.rank().ordinal()==12)
 				newRank = 0;
 				
-			System.out.println("CURRENT RANK AND SUIT TO INTERPRET =" + newRank + " " + currentCard.suit().ordinal());
+			//System.out.println("John's Card rank:" + currentCard.rank());
+			//System.out.println("John's Card suit:" + currentCard.suit());
+			//System.out.println("CURRENT RANK AND SUIT TO INTERPRET =" + newRank + " " + currentCard.suit().ordinal());
 			allCards[i] = new Card(newRank, currentCard.suit().ordinal());
 			
 			// create mapping from String representations to Card objects

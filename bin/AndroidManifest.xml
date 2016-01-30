@@ -11,7 +11,7 @@
           android:anyDensity="true" />
     
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="22" />
 
     <application

@@ -372,6 +372,10 @@ public class newPokerSquares {
 		printGrid(grid);
 	}
 		
+	public Card[][] getGrid() {
+		return grid;
+	}
+	
 	/**
 	 * Demonstrate testing of a PokerSquaresPlayer.
 	 * @param args

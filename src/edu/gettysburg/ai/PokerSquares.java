@@ -360,6 +360,7 @@ public class PokerSquares {
 				grid[row][col] = Card.cardMap.get(testGrid[row][col]);
 		printGrid(grid);
 	}
+
 		
 	/**
 	 * Demonstrate testing of a PokerSquaresPlayer.
@@ -448,6 +449,7 @@ public class PokerSquares {
 	    //Score Mean: 124.815000, Standard Deviation: 30.622064, Minimum: 50, Maximum: 252
 
 	}
+	
 	public static void start(){
 		//new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1, 967313920, false);
 		//new PokerSquares(new IanKayPokerSquaresPlayer2(), GAME_MILLIS).playSequence(1, 100, false);

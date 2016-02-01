@@ -10,6 +10,8 @@
     <string name="Continue">Continue </string>
     <string name="poker_squares">Poker Squares</string>
     <string name="about">About</string>
+    <string name="show_AI">Show AI</string>
+    <string name="hide_AI">Hide AI</string>
     <string name="stats">Stats</string>
     <string name="mute">Mute</string>
     <string name="userName">User\'s Score:</string> 

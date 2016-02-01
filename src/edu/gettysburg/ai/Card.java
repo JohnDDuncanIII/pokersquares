@@ -2,8 +2,6 @@ package edu.gettysburg.ai;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -75,9 +73,6 @@ public class Card {
 		for(int i=0; i<(rankNames.length * suitNames.length); i++){
 			
 			edu.gettysburg.pokersquares.Card currentCard = cards.pop();
-			
-			
-
 			
 			int newRank = currentCard.rank().ordinal()+1;
 			if(currentCard.rank().ordinal()==12)

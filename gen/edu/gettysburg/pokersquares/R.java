@@ -197,6 +197,7 @@ public final class R {
         public static final int r5c3=0x7f0b0027;
         public static final int r5c4=0x7f0b0028;
         public static final int r5c5=0x7f0b0029;
+        public static final int show_AI=0x7f0b004f;
         public static final int stats=0x7f0b004d;
         public static final int tableRow1=0x7f0b002f;
         public static final int tableRow2=0x7f0b0031;
@@ -249,18 +250,20 @@ public final class R {
         public static final int action_settings=0x7f070001;
         public static final int app_name=0x7f070000;
         public static final int card_description=0x7f070002;
-        public static final int hard=0x7f07000e;
-        public static final int losses=0x7f070010;
-        public static final int mute=0x7f07000a;
+        public static final int hard=0x7f070010;
+        public static final int hide_AI=0x7f07000a;
+        public static final int losses=0x7f070012;
+        public static final int mute=0x7f07000c;
         public static final int new_game=0x7f070005;
-        public static final int of_the_time=0x7f07000d;
-        public static final int placeHolder=0x7f07000c;
+        public static final int of_the_time=0x7f07000f;
+        public static final int placeHolder=0x7f07000e;
         public static final int poker_squares=0x7f070007;
-        public static final int stats=0x7f070009;
+        public static final int show_AI=0x7f070009;
+        public static final int stats=0x7f07000b;
         public static final int total=0x7f070004;
-        public static final int userName=0x7f07000b;
-        public static final int wins=0x7f07000f;
-        public static final int won=0x7f070011;
+        public static final int userName=0x7f07000d;
+        public static final int wins=0x7f070011;
+        public static final int won=0x7f070013;
         public static final int zero_default=0x7f070003;
     }
     public static final class style {

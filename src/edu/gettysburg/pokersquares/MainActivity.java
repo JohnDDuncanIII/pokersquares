@@ -28,6 +28,8 @@ import java.util.Stack;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
@@ -73,6 +75,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	private Card[][] 					array   = new Card[5][5];
 	private int 						moves   = 0, gameTotal = 0;//, highestScore;
 	private boolean 					isMuted = false;
+	private boolean						isShowingAI = false;
+	private boolean 					isAllowedToPress = false;
 	private MediaPlayer 				mp      = new MediaPlayer();
 	private String						userName;
 	newPokerSquares computer;
@@ -190,6 +194,19 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		playPlace();
 		// Set the currentView equal to the currently pressed ImageView
 		ImageView currentView = map.get(getResources().getResourceEntryName(v.getId()));
+		
+		/*
+		currentView.setOnTouchListener(new View.OnTouchListener() {
+	        @Override
+	        public boolean onTouch(View v, MotionEvent event) {
+	    		currentView.setColorFilter(Color.rgb(123, 123, 123), android.graphics.PorterDuff.Mode.MULTIPLY);
+	            return false;
+	        }
+	    });
+	    */
+		
+		
+		
 		String fileName 	  = currentDeckCard.toString();
 		fileName 			  = fileName.toLowerCase(Locale.getDefault());
 		int resourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
@@ -242,7 +259,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		updateTotal();
 
 		//System.out.println("SHOWING COMPUTER GRID ITSELF");
-		showAI();
+		//showAI();
 
 		// When the game ends...
 		if(moves==25) {
@@ -450,11 +467,20 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.show_AI:
+			if(isShowingAI) {
+				removeAI();
+				item.setTitle("Show AI");
+			}
+			else {
+				showAI();
+				item.setTitle("Hide AI");
+			}
+			isShowingAI = !isShowingAI;
+			return true;
 		case R.id.about:
-
 			return true;
 		case R.id.stats:
-
 			return true;
 		case R.id.mute:
 			if(isMuted) {
@@ -475,8 +501,181 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		}
 	}
 
-	public boolean onTouch(View v, MotionEvent event)
-	{
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.my_options_menu, menu);
+		return true;
+	}
+
+	public void showAI() {
+		edu.gettysburg.ai.Card[][] grid = computer.getGrid();
+
+		/*
+		for (int j = 0; j<grid[0].length; j++){
+			for (int i = 0; i<grid.length; i++){
+				System.out.println(grid[j][i]);
+			}
+		}
+		 */
+
+		int internalCounter = 0;
+		int counter = 0;
+		// so we can initialize the card faces with a cool pattern
+		// Get resources for all of the ImageViews, set their onClickListener, 
+		//    and then add them to them hashMap of ImageViews using its ID as the key
+		for(int r=1; r<6; r++) {
+			internalCounter = 0;
+			for(int c=1; c<6; c++) {
+				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
+				final ImageView toAdd = (ImageView) findViewById(resourceID);
+				//toAdd.setOnClickListener(this);
+				//toAdd.setEnabled(false);
+				toAdd.setOnClickListener(null);
+				computerMap.put("r" + r + "c" + c, toAdd);
+				Bitmap initialBmp = null;
+
+				if(grid[counter][internalCounter] == null) {
+					initialBmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.toprbvert);
+				} else {
+					edu.gettysburg.ai.Card ca = grid[counter][internalCounter];
+					//System.out.println("RANK " + ca.getRank() + " SUIT: " + ca.getSuit());
+
+					// reverse the interpret
+					int newRank = ca.getRank()-1;
+					if(ca.getRank()==0)
+						newRank = 12;
+
+					// http://stackoverflow.com/questions/609860/convert-from-enum-ordinal-to-enum-type
+					Card pca= new Card(Card.Rank.values()[newRank], Card.Suit.values()[ca.getSuit()]);
+					//System.out.println("NEW RANK: + " + pca.rank() + " SUIT: " + pca.suit());
+
+					String fileName 	  = pca.toString();
+					fileName 			  = fileName.toLowerCase(Locale.getDefault());
+					int nResourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
+					// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
+
+
+					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
+				}
+
+				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
+				final BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
+				initialCur.setAntiAlias(false);
+				toAdd.getLayoutParams().height = initialBmp.getHeight();
+				toAdd.getLayoutParams().width = initialBmp.getWidth();
+				
+				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+				ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				
+				anim.addListener(new AnimatorListener() {
+				    @Override 
+				    public void onAnimationEnd(Animator animation) {
+				    	//toAdd.setRotation(0);
+				    	toAdd.requestLayout();
+				    	toAdd.setImageDrawable(initialCur);
+				    }
+					@Override
+					public void onAnimationStart(Animator animation) {}
+					@Override
+					public void onAnimationCancel(Animator animation) {}
+					@Override
+					public void onAnimationRepeat(Animator animation) {}
+				});
+				
+				anim.setTarget(toAdd);
+				anim.setDuration(1500);
+				anim.start();
+				
+				internalCounter++;
+			}
+			counter++;
+		}
+	}
+
+	public void removeAI(){
+		// so we can initialize the card faces with a cool pattern
+		// Get resources for all of the ImageViews, set their onClickListener, 
+		//    and then add them to them hashMap of ImageViews using its ID as the key
+
+		int internalCounter = 0;
+		int counter = 0;
+		int tCounter = 2;
+		
+		for(int r=1; r<6; r++) {
+			internalCounter = 0;
+			for(int c=1; c<6; c++) {
+				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
+				final ImageView toAdd = (ImageView) findViewById(resourceID);
+				String fileName="";
+				Bitmap initialBmp = null;
+
+				// if there is a card placed there..
+				if(array[counter][internalCounter] != null){
+					isAllowedToPress = false;
+					// get the toString (which should let us grab the file)
+					fileName = array[counter][internalCounter].toString();
+					fileName		= fileName.toLowerCase(Locale.getDefault());
+					// grab the file (for example, deucespades.png)
+					int nResourceID  = getResources().getIdentifier(fileName, "drawable", getPackageName());
+					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
+					
+				}
+				else {
+					isAllowedToPress = true;
+					// dope ternary - you = jealous (re-do the user pattern)
+					initialBmp = tCounter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
+						BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
+					
+					// only allow those that have not been selected already to be clicked
+				}
+				
+				// create the scaled bitmap (do not want phone-specific scaling)
+				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
+				final BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
+				initialCur.setAntiAlias(false);
+				toAdd.getLayoutParams().height = initialBmp.getHeight();
+				toAdd.getLayoutParams().width = initialBmp.getWidth();
+				
+				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+				ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				
+				anim.addListener(new AnimatorListener() {
+				    @Override 
+				    public void onAnimationEnd(Animator animation) {
+						// only changed the imageview when it is done flipping
+				    	
+				    	//toAdd.setRotation(0);
+				    	toAdd.requestLayout();
+				    	toAdd.setImageDrawable(initialCur);
+				    	
+				    	if(isAllowedToPress){
+				    		toAdd.setOnClickListener(MainActivity.this);
+				    	}
+				    	
+				    	
+				    }
+					@Override
+					public void onAnimationStart(Animator animation) {}
+					@Override
+					public void onAnimationCancel(Animator animation) {}
+					@Override
+					public void onAnimationRepeat(Animator animation) {}
+				});
+				
+				anim.setTarget(toAdd);
+				anim.setDuration(1500);
+				anim.start();
+				
+				internalCounter++;
+				tCounter++;
+			}
+			counter++;
+		}
+	}
+	
+	
+	/* Touch-related debug stuff */
+	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_POINTER_DOWN:
 			// This happens when you touch the screen with two fingers
@@ -519,84 +718,5 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			break;
 		}
 		return true;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.my_options_menu, menu);
-		return true;
-	}
-
-	public void showAI(){
-		edu.gettysburg.ai.Card[][] grid = computer.getGrid();
-
-		/*
-		for (int j = 0; j<grid[0].length; j++){
-			for (int i = 0; i<grid.length; i++){
-				System.out.println(grid[j][i]);
-			}
-		}
-		*/
-
-		//System.out.println(grid);
-
-		int internalCounter = 0;
-		int counter = 0;
-		// so we can initialize the card faces with a cool pattern
-		// Get resources for all of the ImageViews, set their onClickListener, 
-		//    and then add them to them hashMap of ImageViews using its ID as the key
-		for(int r=1; r<6; r++) {
-			internalCounter = 0;
-			for(int c=1; c<6; c++) {
-				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
-				ImageView toAdd = (ImageView) findViewById(resourceID);
-				toAdd.setOnClickListener(this);
-				computerMap.put("r" + r + "c" + c, toAdd);
-
-				Bitmap initialBmp = null;
-				
-				if(grid[counter][internalCounter] == null) {
-					initialBmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.toprbvert);
-				} else {
-					edu.gettysburg.ai.Card ca = grid[counter][internalCounter];
-					//System.out.println("RANK " + ca.getRank() + " SUIT: " + ca.getSuit());
-					
-					// reverse the interpret
-					int newRank = ca.getRank()-1;
-					if(ca.getRank()==0)
-						newRank = 12;
-					Card pca= new Card(Card.Rank.values()[newRank], Card.Suit.values()[ca.getSuit()]);
-					//System.out.println("NEW RANK: + " + pca.rank() + " SUIT: " + pca.suit());
-					
-					String fileName 	  = pca.toString();
-					fileName 			  = fileName.toLowerCase(Locale.getDefault());
-					int nResourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
-					// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
-			
-					
-					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
-				}
-				
-
-				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
-				BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
-				initialCur.setAntiAlias(false);
-				toAdd.getLayoutParams().height = initialBmp.getHeight();
-				toAdd.getLayoutParams().width = initialBmp.getWidth();
-				toAdd.requestLayout();
-
-				toAdd.setImageDrawable(initialCur);
-				internalCounter++;
-			}
-			counter++;
-		}
-		 
-
-		// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-		/*ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
-		anim.setTarget(currentView);
-		anim.setDuration(1500);
-		anim.start();
-		 */
 	}
 }

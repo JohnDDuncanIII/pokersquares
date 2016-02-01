@@ -3,7 +3,7 @@ package edu.gettysburg.ai;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Queue;
+//import java.util.Queue;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
@@ -68,13 +68,12 @@ public class newPokerSquares {
 
 		deck = new Stack<Card>();
 		while(!inStack.isEmpty()){
-			System.out.println("CURRENT POSITION IN QUEUE: " + inStack.peek().getRank() + " " + inStack.peek().getSuit());
+			//System.out.println("CURRENT POSITION IN QUEUE: " + inStack.peek().getRank() + " " + inStack.peek().getSuit());
+			// TODO
 			deck.push(inStack.pop());
 		}
-		System.out.println("THE DECK CONTAINS: " + deck);
-		
-		
-		
+		//System.out.println("THE DECK CONTAINS: " + deck);
+		// TODO
 		
 		// shuffle deck
 		/*deck = new Stack<Card>();
@@ -100,7 +99,8 @@ public class newPokerSquares {
 		int cardsPlaced = 0;
 		if (cardsPlaced < SIZE * SIZE) {
 			Card card = deck.pop();
-			System.out.println("CURRENT CARD = " + card );
+			//System.out.println("CURRENT CARD = " + card );
+			// TODO
 			long startTime = System.currentTimeMillis();
 			int[] play = player.getPlay(card, millisRemaining);
 			millisRemaining -= System.currentTimeMillis() - startTime;
@@ -117,6 +117,7 @@ public class newPokerSquares {
 			if (verbose) {
 				printGrid(grid);
 				System.out.println();
+				//TODO
 			}
 		}
 		return getScore(grid);

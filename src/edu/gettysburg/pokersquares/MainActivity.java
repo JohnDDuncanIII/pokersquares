@@ -28,6 +28,7 @@ import java.util.Stack;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
+import android.os.Handler;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
@@ -520,6 +521,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 
 		int internalCounter = 0;
 		int counter = 0;
+		long delay = 0;
 		// so we can initialize the card faces with a cool pattern
 		// Get resources for all of the ImageViews, set their onClickListener, 
 		//    and then add them to them hashMap of ImageViews using its ID as the key
@@ -564,15 +566,66 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				
+				/*
+				new Thread(new Runnable() {
+					public void run() {
+						//Thread.yield();
+						try { 
+							Thread.sleep(1000); 
+						} 
+						catch (InterruptedException e) { e.printStackTrace(); }
+
+						runOnUiThread(new Runnable() {
+							public void run() {
+								// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+								ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.flipping); 
+								anim.addListener(new AnimatorListener() {
+									@Override 
+									public void onAnimationEnd(Animator animation) {
+										//toAdd.setRotation(0);
+										toAdd.requestLayout();
+										toAdd.setImageDrawable(initialCur);
+
+									}
+									@Override
+									public void onAnimationStart(Animator animation) {}
+									@Override
+									public void onAnimationCancel(Animator animation) {}
+									@Override
+									public void onAnimationRepeat(Animator animation) {}
+								});
+
+								anim.setTarget(toAdd);
+								anim.setDuration(1500);
+								anim.start();
+							}
+						});
+					}
+				}).start();
+				
+				
+				
+				*/
+				
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-				ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				
+				/*
+				Handler handler = new Handler();
+				handler.postDelayed(new Runnable() {
+				    public void run() {
+				     
+				    }
+				}, 2000);
+				*/
 				
 				anim.addListener(new AnimatorListener() {
 				    @Override 
 				    public void onAnimationEnd(Animator animation) {
 				    	//toAdd.setRotation(0);
-				    	toAdd.requestLayout();
-				    	toAdd.setImageDrawable(initialCur);
+				    	//toAdd.requestLayout();
+				    	//toAdd.setImageDrawable(initialCur);
+				    	
 				    }
 					@Override
 					public void onAnimationStart(Animator animation) {}
@@ -582,9 +635,42 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					public void onAnimationRepeat(Animator animation) {}
 				});
 				
-				anim.setTarget(toAdd);
-				anim.setDuration(1500);
-				anim.start();
+				
+				
+				Handler handler = new Handler();
+				handler.postDelayed(new Runnable() {
+				    public void run() {
+				    	anim.setTarget(toAdd);
+						anim.setDuration(1500);
+						anim.start();
+						
+						new Thread(new Runnable() {
+							public void run() {
+								//Thread.yield();
+								try { 
+									Thread.sleep((1500/2) - 250); 
+								} 
+								catch (InterruptedException e) { e.printStackTrace(); }
+
+								runOnUiThread(new Runnable() {
+									public void run() {
+										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+										toAdd.requestLayout();
+								    	toAdd.setImageDrawable(initialCur);
+									}
+								});
+								
+								
+							}
+						}).start();
+				    }
+				}, delay);
+			
+				delay += 300;
+				
+				
+				
+				
 				
 				internalCounter++;
 			}
@@ -651,8 +737,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				    	if(isAllowedToPress){
 				    		toAdd.setOnClickListener(MainActivity.this);
 				    	}
-				    	
-				    	
 				    }
 					@Override
 					public void onAnimationStart(Animator animation) {}

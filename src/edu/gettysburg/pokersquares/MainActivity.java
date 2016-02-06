@@ -612,7 +612,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		int cardFaceCounter = 2;
 		long delay = 0;
 
-		for(int col=1; col<6; col++) {
+		for(int col=5; col>0; col--) {
 			internalCounter = 0;
 			for(int row=1; row<6; row++) {
 				int resourceID 	= getResources().getIdentifier("r" + row + "c" + col, "id", getPackageName());
@@ -649,10 +649,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
 				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
-				
 				Handler handler = new Handler();
-				System.out.println(toAdd + " isAllowedToPress (outside of thread)=" + isAllowedToPress);
-				
 				// isAllowedToPress gets reset to its original value below. copy into final 
 				final boolean isAllowedToPressLocal = isAllowedToPress;
 				
@@ -661,8 +658,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				    	anim.setTarget(toAdd);
 						anim.setDuration(1500);
 						anim.start();
-						
-						System.out.println(toAdd + " isAllowedToPress=" + isAllowedToPress);
 						
 						new Thread(new Runnable() {
 							public void run() {

@@ -29,19 +29,15 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 /*
@@ -525,21 +521,21 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		// so we can initialize the card faces with a cool pattern
 		// Get resources for all of the ImageViews, set their onClickListener, 
 		//    and then add them to them hashMap of ImageViews using its ID as the key
-		for(int r=1; r<6; r++) {
+		for(int col=1; col<6; col++) {
 			internalCounter = 0;
-			for(int c=1; c<6; c++) {
-				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
+			for(int row=1; row<6; row++) {
+				int resourceID 	= getResources().getIdentifier("r" + row + "c" + col, "id", getPackageName());
 				final ImageView toAdd = (ImageView) findViewById(resourceID);
 				//toAdd.setOnClickListener(this);
 				//toAdd.setEnabled(false);
 				toAdd.setOnClickListener(null);
-				computerMap.put("r" + r + "c" + c, toAdd);
+				computerMap.put("r" + row + "c" + col, toAdd);
 				Bitmap initialBmp = null;
 
-				if(grid[counter][internalCounter] == null) {
+				if(grid[internalCounter][counter] == null) {
 					initialBmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.toprbvert);
 				} else {
-					edu.gettysburg.ai.Card ca = grid[counter][internalCounter];
+					edu.gettysburg.ai.Card ca = grid[internalCounter][counter];
 					//System.out.println("RANK " + ca.getRank() + " SUIT: " + ca.getSuit());
 
 					// reverse the interpret
@@ -566,76 +562,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				
-				/*
-				new Thread(new Runnable() {
-					public void run() {
-						//Thread.yield();
-						try { 
-							Thread.sleep(1000); 
-						} 
-						catch (InterruptedException e) { e.printStackTrace(); }
-
-						runOnUiThread(new Runnable() {
-							public void run() {
-								// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-								ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.flipping); 
-								anim.addListener(new AnimatorListener() {
-									@Override 
-									public void onAnimationEnd(Animator animation) {
-										//toAdd.setRotation(0);
-										toAdd.requestLayout();
-										toAdd.setImageDrawable(initialCur);
-
-									}
-									@Override
-									public void onAnimationStart(Animator animation) {}
-									@Override
-									public void onAnimationCancel(Animator animation) {}
-									@Override
-									public void onAnimationRepeat(Animator animation) {}
-								});
-
-								anim.setTarget(toAdd);
-								anim.setDuration(1500);
-								anim.start();
-							}
-						});
-					}
-				}).start();
-				
-				
-				
-				*/
-				
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
 				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
-				
-				/*
-				Handler handler = new Handler();
-				handler.postDelayed(new Runnable() {
-				    public void run() {
-				     
-				    }
-				}, 2000);
-				*/
-				
-				anim.addListener(new AnimatorListener() {
-				    @Override 
-				    public void onAnimationEnd(Animator animation) {
-				    	//toAdd.setRotation(0);
-				    	//toAdd.requestLayout();
-				    	//toAdd.setImageDrawable(initialCur);
-				    	
-				    }
-					@Override
-					public void onAnimationStart(Animator animation) {}
-					@Override
-					public void onAnimationCancel(Animator animation) {}
-					@Override
-					public void onAnimationRepeat(Animator animation) {}
-				});
-				
-				
 				
 				Handler handler = new Handler();
 				handler.postDelayed(new Runnable() {
@@ -665,13 +593,9 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 						}).start();
 				    }
 				}, delay);
+				if(row % 5 == 0)
+					delay += 300;
 			
-				delay += 300;
-				
-				
-				
-				
-				
 				internalCounter++;
 			}
 			counter++;
@@ -682,24 +606,25 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		// so we can initialize the card faces with a cool pattern
 		// Get resources for all of the ImageViews, set their onClickListener, 
 		//    and then add them to them hashMap of ImageViews using its ID as the key
-
+		
 		int internalCounter = 0;
 		int counter = 0;
-		int tCounter = 2;
-		
-		for(int r=1; r<6; r++) {
+		int cardFaceCounter = 2;
+		long delay = 0;
+
+		for(int col=1; col<6; col++) {
 			internalCounter = 0;
-			for(int c=1; c<6; c++) {
-				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
+			for(int row=1; row<6; row++) {
+				int resourceID 	= getResources().getIdentifier("r" + row + "c" + col, "id", getPackageName());
 				final ImageView toAdd = (ImageView) findViewById(resourceID);
 				String fileName="";
 				Bitmap initialBmp = null;
 
 				// if there is a card placed there..
-				if(array[counter][internalCounter] != null){
+				if(array[internalCounter][counter] != null){
 					isAllowedToPress = false;
 					// get the toString (which should let us grab the file)
-					fileName = array[counter][internalCounter].toString();
+					fileName = array[internalCounter][counter].toString();
 					fileName		= fileName.toLowerCase(Locale.getDefault());
 					// grab the file (for example, deucespades.png)
 					int nResourceID  = getResources().getIdentifier(fileName, "drawable", getPackageName());
@@ -709,7 +634,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				else {
 					isAllowedToPress = true;
 					// dope ternary - you = jealous (re-do the user pattern)
-					initialBmp = tCounter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
+					initialBmp = cardFaceCounter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
 						BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
 					
 					// only allow those that have not been selected already to be clicked
@@ -723,35 +648,52 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-				ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
 				
-				anim.addListener(new AnimatorListener() {
-				    @Override 
-				    public void onAnimationEnd(Animator animation) {
-						// only changed the imageview when it is done flipping
-				    	
-				    	//toAdd.setRotation(0);
-				    	toAdd.requestLayout();
-				    	toAdd.setImageDrawable(initialCur);
-				    	
-				    	if(isAllowedToPress){
-				    		toAdd.setOnClickListener(MainActivity.this);
-				    	}
+				Handler handler = new Handler();
+				System.out.println(toAdd + " isAllowedToPress (outside of thread)=" + isAllowedToPress);
+				
+				// isAllowedToPress gets reset to its original value below. copy into final 
+				final boolean isAllowedToPressLocal = isAllowedToPress;
+				
+				handler.postDelayed(new Runnable() {
+				    public void run() {
+				    	anim.setTarget(toAdd);
+						anim.setDuration(1500);
+						anim.start();
+						
+						System.out.println(toAdd + " isAllowedToPress=" + isAllowedToPress);
+						
+						new Thread(new Runnable() {
+							public void run() {
+								//Thread.yield();
+								try { 
+									Thread.sleep((1500/2) - 250); 
+								} 
+								catch (InterruptedException e) { e.printStackTrace(); }
+								
+								runOnUiThread(new Runnable() {
+									public void run() {
+										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
+										toAdd.requestLayout();
+								    	toAdd.setImageDrawable(initialCur);
+								    	
+								    	
+								    	
+								    	if(isAllowedToPressLocal){
+								    		toAdd.setOnClickListener(MainActivity.this);
+								    	}
+									}
+								});
+							}
+						}).start();
 				    }
-					@Override
-					public void onAnimationStart(Animator animation) {}
-					@Override
-					public void onAnimationCancel(Animator animation) {}
-					@Override
-					public void onAnimationRepeat(Animator animation) {}
-				});
-				
-				anim.setTarget(toAdd);
-				anim.setDuration(1500);
-				anim.start();
+				}, delay);
+				if(row % 5 == 0)
+					delay += 300;
 				
 				internalCounter++;
-				tCounter++;
+				cardFaceCounter++;
 			}
 			counter++;
 		}
@@ -798,7 +740,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		switch(action & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_POINTER_DOWN:
 			// multi-touch!! - touch down
-			int count = event.getPointerCount(); // Number of 'fingers' in this time
+			//int count = event.getPointerCount(); // Number of 'fingers' in this time
 			break;
 		}
 		return true;

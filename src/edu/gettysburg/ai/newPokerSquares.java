@@ -55,6 +55,7 @@ public class newPokerSquares {
 	private Card[][] grid = new Card[SIZE][SIZE]; // current game grid
 	private Random random = new Random(); // current game random number generator
 	Stack<Card> deck;
+	int gameTotalScore = 0;
 	
 	/**
 	 * @param player Poker Squares player object
@@ -227,6 +228,8 @@ public class newPokerSquares {
 		for (int handScore : handScores)
 			totalScore += handScore;
 		
+		//gameTotalScore = totalScore;
+		
 		// print grid
 		for (int row = 0; row < SIZE; row++) {
 			for (int col = 0; col < SIZE; col++) 
@@ -244,6 +247,14 @@ public class newPokerSquares {
 	 * @return score of given Card grid
 	 */
 	public static int getScore(Card[][] grid) {
+		int[] handScores = getHandScores(grid);
+		int totalScore = 0;
+		for (int handScore : handScores)
+			totalScore += handScore;
+		return totalScore;
+	}
+	
+	public int getScore() {
 		int[] handScores = getHandScores(grid);
 		int totalScore = 0;
 		for (int handScore : handScores)

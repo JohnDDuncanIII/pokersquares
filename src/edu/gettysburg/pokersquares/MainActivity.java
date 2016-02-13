@@ -40,6 +40,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.view.Gravity;
 /*
 import android.content.res.AssetManager;
 import android.content.Context;
@@ -55,6 +56,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,6 +66,7 @@ import edu.gettysburg.ai.*;
 public class MainActivity extends Activity implements View.OnClickListener, OnTouchListener {
 	private Stack<Card> 				deck; 
 	private ArrayList<List<Card>> 		places  = new ArrayList<List<Card>>();
+	private ArrayList<List<Card>> 		computerPlaces  = new ArrayList<List<Card>>();
 	private HashMap<String, ImageView>  map    	= new HashMap<String, ImageView>();
 	private HashMap<String, ImageView>  computerMap    	= new HashMap<String, ImageView>();
 	private HashMap<String, TextView>   textMap = new HashMap<String, TextView>();
@@ -70,12 +74,13 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	private ImageView  					deckView;
 	private Card 			  			currentDeckCard;
 	private Card[][] 					array   = new Card[5][5];
-	private int 						moves   = 0, gameTotal = 0;//, highestScore;
+	private int 						moves   = 0, gameTotal = 0, computerScore = 0;//, highestScore;
 	private boolean 					isMuted = false;
 	private boolean						isShowingAI = false;
 	private boolean 					isAllowedToPress = false;
+	private boolean						isAllowedToShow	= true;
 	private MediaPlayer 				mp      = new MediaPlayer();
-	private String						userName;
+	private String						userName = "";
 	newPokerSquares computer;
 
 	// swipe stuff
@@ -187,11 +192,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		// System.out.println("PX :" + dpFromPx(this, 96));
 		// increment computer move by one
 		computer.nextMove();
+		computerScore = computer.getScore();
+		System.out.println("COMPUTER SCORE: " + computerScore);
+		//computer.get
 		// play simple sound when placing card on the table. short and succinct
 		playPlace();
 		// Set the currentView equal to the currently pressed ImageView
 		ImageView currentView = map.get(getResources().getResourceEntryName(v.getId()));
-		
+
 		/*
 		currentView.setOnTouchListener(new View.OnTouchListener() {
 	        @Override
@@ -200,10 +208,10 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	            return false;
 	        }
 	    });
-	    */
-		
-		
-		
+		 */
+
+
+
 		String fileName 	  = currentDeckCard.toString();
 		fileName 			  = fileName.toLowerCase(Locale.getDefault());
 		int resourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
@@ -252,6 +260,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 
 		moves++;
 		updateArray();
+		updateComputerArray();
 		checkScoreUpdateLabels();
 		updateTotal();
 
@@ -300,6 +309,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			Collections.sort(places.get(i));
 		}
 
+
+
 		/* 
 		 * // DEBUG: Output the text representation of the sorted card arrays. For debug purposes -- Delete before final release.
 		for(int i=0; i<places.size(); i++) {
@@ -311,18 +322,80 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		 */
 	}
 
+	public void updateComputerArray() {
+
+		List<Card> tmp = new LinkedList<Card>();
+		computerPlaces = new ArrayList<List<Card>>(); 
+
+		// Get [rows][cols]
+		for (int r=0; r<computer.getGrid().length; r++) {
+			for(int c=0; c<computer.getGrid()[r].length; c++) {
+				if(computer.getGrid()[r][c] != null) {
+					// If the value exists, add it to a temporary list for the row/col
+					edu.gettysburg.ai.Card ca = computer.getGrid()[r][c];
+
+					// reverse the interpret
+					int newRank = ca.getRank()-1;
+					if(ca.getRank()==0)
+						newRank = 12;
+
+					// http://stackoverflow.com/questions/609860/convert-from-enum-ordinal-to-enum-type
+					Card pca= new Card(Card.Rank.values()[newRank], Card.Suit.values()[ca.getSuit()]);
+					tmp.add(pca);
+				}
+			}
+			computerPlaces.add(tmp);
+			tmp = new LinkedList<Card>();
+		}
+
+		tmp = new LinkedList<Card>();
+
+		// Get [cols][rows]
+		for (int r=0; r<computer.getGrid().length; r++) {
+			for(int c=0; c<computer.getGrid()[r].length; c++) {
+				if(computer.getGrid()[c][r] != null) {
+					// If the value exists, add it to a temporary list for the row/col
+					edu.gettysburg.ai.Card ca = computer.getGrid()[c][r];
+
+
+					// reverse the interpret
+					int newRank = ca.getRank()-1;
+					if(ca.getRank()==0)
+						newRank = 12;
+
+					// http://stackoverflow.com/questions/609860/convert-from-enum-ordinal-to-enum-type
+					Card pca= new Card(Card.Rank.values()[newRank], Card.Suit.values()[ca.getSuit()]);
+					tmp.add(pca);
+				}
+			}
+			computerPlaces.add(tmp);
+			tmp = new LinkedList<Card>();
+		}
+
+		// Sort all of the temporary lists (since our Card class implements Comparable)
+		for (int i=0; i<computerPlaces.size(); i++) {
+			Collections.sort(computerPlaces.get(i));
+		}
+	}
+
 	/**
 	 * When the game ends, update the array and check the score one final time and then update the total.
 	 * Then show an alertDialog allowing the user to either continue playing or exit the game.
 	 */
+	// TODO: Show computer winning board
 	public void endGame() {
 		updateArray();
 		checkScoreUpdateLabels();
 		deckView.setImageResource(getResources().getIdentifier("nblank", "drawable", getPackageName()));
 		updateTotal();
+		showAI();
 
+		if(userName.equals("")) {
+			userName = "Guy";
+		}
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Game Over! \nCongratulations " + userName + "!" + " \nTotal score was " + textTotal.getText())       
+		builder       
 		.setCancelable(false)
 		.setPositiveButton("New Game", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
@@ -344,7 +417,23 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			}
 		});
 
+		if(computerScore > gameTotal) {
+			builder.setMessage("Game Over! \n" + userName + ", you lose!" + " \nYour score was " + textTotal.getText() 
+			+ "\n" + "Computer score was " + computerScore);
+		} else {
+			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + textTotal.getText() 
+			+ "\n" + "Computer score was " + computerScore);
+		}
+
 		AlertDialog alert = builder.create();
+
+		Window window = alert.getWindow();
+		WindowManager.LayoutParams wlp = window.getAttributes();
+
+		wlp.gravity = Gravity.BOTTOM;
+		wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+		window.setAttributes(wlp);
+
 		alert.show();
 	}
 
@@ -415,6 +504,43 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			textMap.get("view"+ i).setText(String.valueOf(sectionTotal));
 		}
 	}
+	
+	public void checkScoreUpdateLabelsComputer() {
+		for(int i=0; i<computerPlaces.size(); i++) {
+			List<Card> tmp = computerPlaces.get(i);
+			int sectionTotal = 0;
+
+			if(tmp.size()==5 && Card.isRoyalFlush(tmp)) {
+				sectionTotal+=100;
+			}
+			else if(tmp.size()==5 && Card.isStraightFlush(tmp)) {
+				sectionTotal+=75;
+			}
+			else if(tmp.size()>=4 && Card.isFourOfAKind(tmp)) {
+				sectionTotal+=50;
+			}
+			else if(tmp.size()==5 && Card.isFullHouse(tmp)) {
+				sectionTotal+=25;
+			}
+			else if(tmp.size()==5 && Card.isFlush(tmp)) {
+				sectionTotal+=20;
+			}
+			else if(tmp.size()==5 && Card.isStraight(tmp)) {
+				sectionTotal+=15;
+			}
+			else if(tmp.size()>=3 && Card.hasThreeOfAKind(tmp)) {
+				sectionTotal+=10;
+			}
+			else if(tmp.size()>=4 && Card.hasTwoPair(tmp, tmp.size())) {
+				sectionTotal+=5;
+			}
+			else if(tmp.size()>=2 && Card.hasPair(tmp)) {
+				sectionTotal+=2;
+			}
+
+			textMap.get("view"+ i).setText(String.valueOf(sectionTotal));
+		}
+	}
 
 	/**
 	 * Scrape the values of each of the views and add them all together for the total.
@@ -426,6 +552,10 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		}
 		gameTotal = total;
 		textTotal.setText(String.valueOf(gameTotal));
+	}
+	
+	public void updateComputerTotal() {
+		textTotal.setText(String.valueOf(computerScore));
 	}
 
 	/**
@@ -465,15 +595,25 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.show_AI:
-			if(isShowingAI) {
-				removeAI();
-				item.setTitle("Show AI");
+			if(isAllowedToShow) {
+				if(isShowingAI) {
+
+					removeAI();
+					item.setTitle("Show AI");
+					checkScoreUpdateLabels();
+					updateTotal();
+				}
+				else {
+
+					showAI();
+					item.setTitle("Hide AI");
+					checkScoreUpdateLabelsComputer();
+					updateComputerTotal();
+
+
+				}
+				isShowingAI = !isShowingAI;
 			}
-			else {
-				showAI();
-				item.setTitle("Hide AI");
-			}
-			isShowingAI = !isShowingAI;
 			return true;
 		case R.id.about:
 			return true;
@@ -514,7 +654,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			}
 		}
 		 */
-
+		isAllowedToShow = false;
 		int internalCounter = 0;
 		int counter = 0;
 		long delay = 0;
@@ -561,17 +701,18 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				initialCur.setAntiAlias(false);
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
-				
+
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
 				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
-				
+				final int c = col;
+
 				Handler handler = new Handler();
 				handler.postDelayed(new Runnable() {
-				    public void run() {
-				    	anim.setTarget(toAdd);
+					public void run() {
+						anim.setTarget(toAdd);
 						anim.setDuration(1500);
 						anim.start();
-						
+
 						new Thread(new Runnable() {
 							public void run() {
 								//Thread.yield();
@@ -584,35 +725,43 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 									public void run() {
 										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
 										toAdd.requestLayout();
-								    	toAdd.setImageDrawable(initialCur);
+										toAdd.setImageDrawable(initialCur);
+										if(c == 5) {
+											isAllowedToShow = true;
+
+										}
 									}
 								});
-								
-								
+
+
 							}
 						}).start();
-				    }
+
+					}
 				}, delay);
 				if(row % 5 == 0)
-					delay += 300;
-			
+					delay += 150;
+
 				internalCounter++;
 			}
 			counter++;
+
 		}
+		
+		//isAllowedToShow = true;
 	}
 
 	public void removeAI(){
 		// so we can initialize the card faces with a cool pattern
 		// Get resources for all of the ImageViews, set their onClickListener, 
 		//    and then add them to them hashMap of ImageViews using its ID as the key
-		
+		isAllowedToShow = false;
 		int internalCounter = 0;
-		int counter = 0;
+		int counter = 4;
 		int cardFaceCounter = 2;
 		long delay = 0;
 
-		for(int col=5; col>0; col--) {
+		for(int col=5; col>0; col--) { // this is for the actual card imagviews
 			internalCounter = 0;
 			for(int row=1; row<6; row++) {
 				int resourceID 	= getResources().getIdentifier("r" + row + "c" + col, "id", getPackageName());
@@ -629,36 +778,37 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					// grab the file (for example, deucespades.png)
 					int nResourceID  = getResources().getIdentifier(fileName, "drawable", getPackageName());
 					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
-					
+
 				}
 				else {
 					isAllowedToPress = true;
 					// dope ternary - you = jealous (re-do the user pattern)
 					initialBmp = cardFaceCounter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
 						BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
-					
+
 					// only allow those that have not been selected already to be clicked
 				}
-				
+
 				// create the scaled bitmap (do not want phone-specific scaling)
 				initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
 				final BitmapDrawable initialCur = new BitmapDrawable(this.getResources(), initialBmp);
 				initialCur.setAntiAlias(false);
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
-				
+
 				// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping); 
+				final ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.flipping_back); 
 				Handler handler = new Handler();
 				// isAllowedToPress gets reset to its original value below. copy into final 
 				final boolean isAllowedToPressLocal = isAllowedToPress;
-				
+				final int c = col;
+
 				handler.postDelayed(new Runnable() {
-				    public void run() {
-				    	anim.setTarget(toAdd);
+					public void run() {
+						anim.setTarget(toAdd);
 						anim.setDuration(1500);
 						anim.start();
-						
+
 						new Thread(new Runnable() {
 							public void run() {
 								//Thread.yield();
@@ -666,35 +816,38 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 									Thread.sleep((1500/2) - 250); 
 								} 
 								catch (InterruptedException e) { e.printStackTrace(); }
-								
+
 								runOnUiThread(new Runnable() {
 									public void run() {
 										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
 										toAdd.requestLayout();
-								    	toAdd.setImageDrawable(initialCur);
-								    	
-								    	
-								    	
-								    	if(isAllowedToPressLocal){
-								    		toAdd.setOnClickListener(MainActivity.this);
-								    	}
+										toAdd.setImageDrawable(initialCur);
+
+										if(isAllowedToPressLocal){
+											toAdd.setOnClickListener(MainActivity.this);
+										}
+										if(c == 1) {
+											isAllowedToShow = true;
+										}
 									}
 								});
 							}
 						}).start();
-				    }
+					}
 				}, delay);
 				if(row % 5 == 0)
 					delay += 300;
-				
-				internalCounter++;
+
+				internalCounter++; // we want to increase rows
 				cardFaceCounter++;
 			}
-			counter++;
+			counter--; // decrease cols
 		}
+		
+		//isAllowedToShow = true;
 	}
-	
-	
+
+
 	/* Touch-related debug stuff */
 	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {

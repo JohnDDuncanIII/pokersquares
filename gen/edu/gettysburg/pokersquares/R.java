@@ -10,6 +10,7 @@ package edu.gettysburg.pokersquares;
 public final class R {
     public static final class animator {
         public static final int flipping=0x7f040000;
+        public static final int flipping_back=0x7f040001;
     }
     public static final class attr {
     }

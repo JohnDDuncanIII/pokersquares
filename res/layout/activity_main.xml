@@ -76,7 +76,7 @@
 
         <TextView
             android:id="@+id/view0"
-            android:layout_width="wrap_content"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:paddingRight="7dp"
             android:text="@string/zero_default"
@@ -135,7 +135,7 @@
 
         <TextView
             android:id="@+id/view1"
-            android:layout_width="wrap_content"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:paddingRight="7dp"
             android:text="@string/zero_default"
@@ -193,7 +193,7 @@
 
         <TextView
             android:id="@+id/view2"
-            android:layout_width="wrap_content"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:paddingRight="7dp"
@@ -252,7 +252,7 @@
 
         <TextView
             android:id="@+id/view3"
-            android:layout_width="wrap_content"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:paddingRight="7dp"
             android:text="@string/zero_default"
@@ -310,7 +310,7 @@
 
         <TextView
             android:id="@+id/view4"
-            android:layout_width="wrap_content"
+            android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:paddingRight="7dp"
             android:text="@string/zero_default"
@@ -362,8 +362,10 @@
         android:id="@+id/deckView"
         android:layout_width="54dp"
         android:layout_height="72dp"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/LinearLayout04"
+        android:layout_marginTop="20dp"
         android:contentDescription="@string/card_description"
         android:src="@drawable/bjoker" />
 

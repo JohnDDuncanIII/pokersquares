@@ -280,13 +280,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	private void updateArray(){
 		List<Card> tmp = new LinkedList<Card>();
 		places = new ArrayList<List<Card>>(); 
-
+		
+		
 		// Get [rows][cols]
 		for (int r=0; r<array.length; r++) {
 			for(int c=0; c<array[r].length; c++) {
-				if(array[r][c]!=null)
-					// If the value exists, add it to a temporary list for the row/col
+				if(array[r][c]!=null) { // If the value exists, add it to a temporary list for the row/col
 					tmp.add(array[r][c]);
+				}
 			}
 			places.add(tmp);
 			tmp = new LinkedList<Card>();
@@ -297,12 +298,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		// Get [cols][rows]
 		for (int r=0; r<array.length; r++) {
 			for(int c=0; c<array[r].length; c++) {
-				if(array[c][r]!=null)
+				if(array[c][r]!=null) {
 					tmp.add(array[c][r]);
+				}
 			}
 			places.add(tmp);
 			tmp = new LinkedList<Card>();
 		}
+		
 
 		// Sort all of the temporary lists (since our Card class implements Comparable)
 		for (int i=0; i<places.size(); i++) {
@@ -836,7 +839,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					}
 				}, delay);
 				if(row % 5 == 0)
-					delay += 300;
+					delay += 150;
 
 				internalCounter++; // we want to increase rows
 				cardFaceCounter++;

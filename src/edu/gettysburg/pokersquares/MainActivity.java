@@ -1,22 +1,9 @@
 package edu.gettysburg.pokersquares;
 
-/*
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
- */
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,28 +16,21 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.Gravity;
-/*
-import android.content.res.AssetManager;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
-import android.widget.LinearLayout;
- */
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -97,12 +77,18 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
 		// Get userName from SplashScreen activity
 		Bundle bundle = getIntent().getExtras();
 		userName = bundle.getString("userName");
+		
+		try {
+			openFileInput("narl.dat");
+		} catch (FileNotFoundException e) {
+			copyAssets();
+			e.printStackTrace();
+		}
 
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
 		// Get resources for all of the vertical + horizontal textViews, then add it to the hashMap of textViews using its ID as the key
@@ -194,7 +180,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		computer.nextMove();
 		computerScore = computer.getScore();
 		System.out.println("COMPUTER SCORE: " + computerScore);
-		//computer.get
 		// play simple sound when placing card on the table. short and succinct
 		playPlace();
 		// Set the currentView equal to the currently pressed ImageView
@@ -209,8 +194,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	        }
 	    });
 		 */
-
-
 
 		String fileName 	  = currentDeckCard.toString();
 		fileName 			  = fileName.toLowerCase(Locale.getDefault());
@@ -240,7 +223,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 
 		currentView.setImageDrawable(bdCur);
 		currentView.setClickable(false);
-
 
 		// Get the next card in the deck and make it the next card in the deckView
 		currentDeckCard 	  = deck.pop();
@@ -280,8 +262,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	private void updateArray(){
 		List<Card> tmp = new LinkedList<Card>();
 		places = new ArrayList<List<Card>>(); 
-		
-		
+
+
 		// Get [rows][cols]
 		for (int r=0; r<array.length; r++) {
 			for(int c=0; c<array[r].length; c++) {
@@ -305,14 +287,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			places.add(tmp);
 			tmp = new LinkedList<Card>();
 		}
-		
+
 
 		// Sort all of the temporary lists (since our Card class implements Comparable)
 		for (int i=0; i<places.size(); i++) {
 			Collections.sort(places.get(i));
 		}
-
-
 
 		/* 
 		 * // DEBUG: Output the text representation of the sorted card arrays. For debug purposes -- Delete before final release.
@@ -326,7 +306,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	}
 
 	public void updateComputerArray() {
-
 		List<Card> tmp = new LinkedList<Card>();
 		computerPlaces = new ArrayList<List<Card>>(); 
 
@@ -385,18 +364,20 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	 * When the game ends, update the array and check the score one final time and then update the total.
 	 * Then show an alertDialog allowing the user to either continue playing or exit the game.
 	 */
-	// TODO: Show computer winning board
 	public void endGame() {
 		updateArray();
 		checkScoreUpdateLabels();
 		deckView.setImageResource(getResources().getIdentifier("nblank", "drawable", getPackageName()));
 		updateTotal();
 		showAI();
+		checkScoreUpdateLabelsComputer();
+		//int userGameTotal = 
+		updateComputerTotal();
 
 		if(userName.equals("")) {
-			userName = "Guy";
+			userName = "Bud";
 		}
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder       
 		.setCancelable(false)
@@ -421,10 +402,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		});
 
 		if(computerScore > gameTotal) {
-			builder.setMessage("Game Over! \n" + userName + ", you lose!" + " \nYour score was " + textTotal.getText() 
+			builder.setMessage("Game Over! \n" + userName + ", you lose!" + " \nYour score was " + gameTotal 
 			+ "\n" + "Computer score was " + computerScore);
-		} else {
-			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + textTotal.getText() 
+		} else if(computerScore == gameTotal) {
+			builder.setMessage("Game Over! \n" + userName + ", you tied!" + " \nYour score was " + gameTotal 
+			+ "\n" + "Computer score was " + computerScore);
+		}
+		else {
+			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + gameTotal
 			+ "\n" + "Computer score was " + computerScore);
 		}
 
@@ -507,7 +492,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			textMap.get("view"+ i).setText(String.valueOf(sectionTotal));
 		}
 	}
-	
+
 	public void checkScoreUpdateLabelsComputer() {
 		for(int i=0; i<computerPlaces.size(); i++) {
 			List<Card> tmp = computerPlaces.get(i);
@@ -556,7 +541,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		gameTotal = total;
 		textTotal.setText(String.valueOf(gameTotal));
 	}
-	
+
 	public void updateComputerTotal() {
 		textTotal.setText(String.valueOf(computerScore));
 	}
@@ -669,8 +654,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			for(int row=1; row<6; row++) {
 				int resourceID 	= getResources().getIdentifier("r" + row + "c" + col, "id", getPackageName());
 				final ImageView toAdd = (ImageView) findViewById(resourceID);
-				//toAdd.setOnClickListener(this);
-				//toAdd.setEnabled(false);
 				toAdd.setOnClickListener(null);
 				computerMap.put("r" + row + "c" + col, toAdd);
 				Bitmap initialBmp = null;
@@ -679,8 +662,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					initialBmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.toprbvert);
 				} else {
 					edu.gettysburg.ai.Card ca = grid[internalCounter][counter];
-					//System.out.println("RANK " + ca.getRank() + " SUIT: " + ca.getSuit());
-
 					// reverse the interpret
 					int newRank = ca.getRank()-1;
 					if(ca.getRank()==0)
@@ -694,7 +675,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					fileName 			  = fileName.toLowerCase(Locale.getDefault());
 					int nResourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
 					// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
-
 
 					initialBmp = BitmapFactory.decodeResource(this.getResources(), nResourceID);
 				}
@@ -750,8 +730,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			counter++;
 
 		}
-		
-		//isAllowedToShow = true;
 	}
 
 	public void removeAI(){
@@ -788,7 +766,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					// dope ternary - you = jealous (re-do the user pattern)
 					initialBmp = cardFaceCounter % 2 == 0 ? BitmapFactory.decodeResource(this.getResources(), R.drawable.topbvert): 
 						BitmapFactory.decodeResource(this.getResources(), R.drawable.toprvert);
-
 					// only allow those that have not been selected already to be clicked
 				}
 
@@ -846,10 +823,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			}
 			counter--; // decrease cols
 		}
-		
-		//isAllowedToShow = true;
 	}
-
 
 	/* Touch-related debug stuff */
 	public boolean onTouch(View v, MotionEvent event) {
@@ -895,5 +869,32 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			break;
 		}
 		return true;
+	}
+
+	private void copyAssets() {
+		AssetManager assetManager = getAssets();
+		InputStream in = null;
+		OutputStream out = null;
+		try {
+			in = assetManager.open("narl.dat");
+			out = openFileOutput("narl.dat", Context.MODE_PRIVATE);
+			//out = new FileOutputStream(outFile);
+			copyFile(in, out);
+			in.close();
+			in = null;
+			out.flush();
+			out.close();
+			out = null;
+		} catch(IOException e) {
+			Log.e("tag", "Failed to copy asset file: " + "narl.dat", e);
+		}       
+
+	}
+	private void copyFile(InputStream in, OutputStream out) throws IOException {
+		byte[] buffer = new byte[1024];
+		int read;
+		while((read = in.read(buffer)) != -1){
+			out.write(buffer, 0, read);
+		}
 	}
 }

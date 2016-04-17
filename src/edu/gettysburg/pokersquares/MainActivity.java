@@ -30,20 +30,22 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
+import android.view.View.DragShadowBuilder;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import edu.gettysburg.ai.*;
+import edu.gettysburg.ai.NARLPokerSquaresPlayer;
+import edu.gettysburg.ai.newPokerSquares;
 
-public class MainActivity extends Activity implements View.OnClickListener, OnTouchListener {
+public class MainActivity extends Activity implements View.OnClickListener, View.OnTouchListener {
 	private Stack<Card> 				deck; 
 	private ArrayList<List<Card>> 		places  = new ArrayList<List<Card>>();
 	private ArrayList<List<Card>> 		computerPlaces  = new ArrayList<List<Card>>();
@@ -82,7 +84,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		// Get userName from SplashScreen activity
 		Bundle bundle = getIntent().getExtras();
 		userName = bundle.getString("userName");
-		
+
+		// read the AI in from the trained player, or push the AI player into the local storage of the device
 		try {
 			openFileInput("narl.dat");
 		} catch (FileNotFoundException e) {
@@ -90,7 +93,9 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			e.printStackTrace();
 		}
 
+		// Get the profont front from the assets folder
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
+
 		// Get resources for all of the vertical + horizontal textViews, then add it to the hashMap of textViews using its ID as the key
 		for(int i=0; i<=9; i++) {
 			int resourceID 	= getResources().getIdentifier("view"+i, "id", getPackageName());
@@ -98,23 +103,27 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			if(i>=5) toAdd.setWidth(70);
 			toAdd.getPaint().setAntiAlias(false);
 			toAdd.setTypeface(tf);
+			//toAdd.setTextSize(12);
 			textMap.put("view"+i, toAdd);
 		}
 
+		// set DPI-independent padding for the first linera layout (holding all of the horizontal text views)
 		View tmp = (View) findViewById (getResources().getIdentifier("linearlayout0", "id", getPackageName()));
 		tmp.setPadding(75, 0, 0, 0);
 
+		// instantiate and set the typeface for the text total objects
 		textTotal 		 = (TextView) findViewById(R.id.textTotal);
 		textTotal.setTypeface(tf);
 		textTotalString  = (TextView) findViewById(R.id.textTotalString);
 
-		// Initialize card deck, then shuffle it (arbitrarily) three times to ensure randomness
+		// Initialize card deck, then shuffle it to ensure randomness
 		deck 			 = Card.initialize();
-
 		Collections.shuffle(deck);
 
+		// make a copy of the deck
 		@SuppressWarnings("unchecked")
 		Stack<Card> deckCopy = (Stack<Card>) deck.clone();
+		// create computer AI player
 		NARLPokerSquaresPlayer player = new NARLPokerSquaresPlayer();
 		computer = new newPokerSquares(player, 60000, edu.gettysburg.ai.Card.interpret(deckCopy));
 
@@ -132,6 +141,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			for(int c=1; c<6; c++) {
 				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
 				ImageView toAdd = (ImageView) findViewById(resourceID);
+				//toAdd.setOnDragListener(l);
 				toAdd.setOnClickListener(this);
 				map.put("r" + r + "c" + c, toAdd);
 
@@ -147,12 +157,60 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 				toAdd.requestLayout();
 
 				toAdd.setImageDrawable(initialCur);
+
+
+				toAdd.setOnDragListener(new View.OnDragListener() {
+					//View draggedView;
+					@Override
+					public boolean onDrag(View v, DragEvent event) {
+						switch (event.getAction()) {
+						case DragEvent.ACTION_DRAG_STARTED:
+							//draggedView = (View) event.getLocalState();
+							//draggedView.setVisibility(View.INVISIBLE);
+							break;
+						case DragEvent.ACTION_DRAG_ENTERED:
+							break;
+						case DragEvent.ACTION_DRAG_EXITED:
+							break;
+						case DragEvent.ACTION_DROP:
+							//ImageView view = (ImageView) event.getLocalState();
+							//view.setVisibility(View.INVISIBLE);
+							//v.setVisibility(View.INVISIBLE);
+							onClick(v);
+							break;
+						case DragEvent.ACTION_DRAG_ENDED:
+							//draggedView.setVisibility(View.VISIBLE);
+							break;
+						default:
+							break;
+						}
+						return true;
+					}
+
+				});
+
+
 				counter++;
 			}
 		}
 
 		// Get resource for the deckView, then pop the first card off of the stack and set the top of the deckView equal to the cards resource in /res
 		deckView 		= (ImageView) findViewById(R.id.deckView);
+		deckView.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+					v.startDrag(null, shadowBuilder, v, 0);
+			        v.performClick();
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+		});
+
 		currentDeckCard = deck.pop();
 		String fileName = currentDeckCard.toString();
 		fileName		= fileName.toLowerCase(Locale.getDefault());
@@ -174,84 +232,73 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	 */
 	@Override
 	public void onClick(View v) {
-		// System.out.println("PX :" + dpFromPx(this, 71));
-		// System.out.println("PX :" + dpFromPx(this, 96));
-		// increment computer move by one
-		computer.nextMove();
-		computerScore = computer.getScore();
-		System.out.println("COMPUTER SCORE: " + computerScore);
-		// play simple sound when placing card on the table. short and succinct
-		playPlace();
-		// Set the currentView equal to the currently pressed ImageView
 		ImageView currentView = map.get(getResources().getResourceEntryName(v.getId()));
+		if(currentView.isClickable()) {
+			// increment computer move by one
+			computer.nextMove();
+			computerScore = computer.getScore();
+			System.out.println("COMPUTER SCORE: " + computerScore);
+			// play simple sound when placing card on the table. short and succinct
+			playPlace();
+			String fileName 	  = currentDeckCard.toString();
+			fileName 			  = fileName.toLowerCase(Locale.getDefault());
+			int resourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
 
-		/*
-		currentView.setOnTouchListener(new View.OnTouchListener() {
-	        @Override
-	        public boolean onTouch(View v, MotionEvent event) {
-	    		currentView.setColorFilter(Color.rgb(123, 123, 123), android.graphics.PorterDuff.Mode.MULTIPLY);
-	            return false;
-	        }
-	    });
-		 */
+			// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
+			String imageViewName  = getResources().getResourceEntryName(v.getId());
+			int row 			  = Integer.parseInt(imageViewName.substring(1,2)) - 1;
+			int col 			  = Integer.parseInt(imageViewName.substring(3,4)) - 1;
+			array[row][col]		  = currentDeckCard;
 
-		String fileName 	  = currentDeckCard.toString();
-		fileName 			  = fileName.toLowerCase(Locale.getDefault());
-		int resourceID 	      = getResources().getIdentifier(fileName, "drawable", getPackageName());
+			// since we are using Bitmap playing cards (thanks Susan Kare), 
+			//    we have to ensure that they will NOT be anti-aliased
+			Bitmap gridBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
+			gridBmp = Bitmap.createScaledBitmap(gridBmp, gridBmp.getWidth(), gridBmp.getHeight(), false); 
 
-		// Get the coordinates of the view from the name, then add it to the master array of cards for computation purposes
-		String imageViewName  = getResources().getResourceEntryName(v.getId());
-		int row 			  = Integer.parseInt(imageViewName.substring(1,2)) - 1;
-		int col 			  = Integer.parseInt(imageViewName.substring(3,4)) - 1;
-		array[row][col]		  = currentDeckCard;
+			//currentView.setImageBitmap(gridBmp);
+			// Set the actual image of the ImageView in the program to the resource
+			//currentView.setImageResource(resourceID);
 
-		// since we are using Bitmap playing cards (thanks Susan Kare), 
-		//    we have to ensure that they will NOT be anti-aliased
-		Bitmap gridBmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
-		gridBmp = Bitmap.createScaledBitmap(gridBmp, gridBmp.getWidth(), gridBmp.getHeight(), false); 
+			BitmapDrawable bdCur = new BitmapDrawable(this.getResources(), gridBmp);
+			bdCur.setAntiAlias(false);
 
-		//currentView.setImageBitmap(gridBmp);
-		// Set the actual image of the ImageView in the program to the resource
-		//currentView.setImageResource(resourceID);
+			currentView.getLayoutParams().height = gridBmp.getHeight();
+			currentView.getLayoutParams().width = gridBmp.getWidth();
+			currentView.requestLayout();
 
-		BitmapDrawable bdCur = new BitmapDrawable(this.getResources(), gridBmp);
-		bdCur.setAntiAlias(false);
+			currentView.setImageDrawable(bdCur);
+			currentView.setClickable(false);
 
-		currentView.getLayoutParams().height = gridBmp.getHeight();
-		currentView.getLayoutParams().width = gridBmp.getWidth();
-		currentView.requestLayout();
 
-		currentView.setImageDrawable(bdCur);
-		currentView.setClickable(false);
+			// Get the next card in the deck and make it the next card in the deckView
+			currentDeckCard 	  = deck.pop();
+			fileName 			  = currentDeckCard.toString();
+			fileName 			  = fileName.toLowerCase(Locale.getDefault());
+			resourceID  		  = getResources().getIdentifier(fileName, "drawable", getPackageName());
 
-		// Get the next card in the deck and make it the next card in the deckView
-		currentDeckCard 	  = deck.pop();
-		fileName 			  = currentDeckCard.toString();
-		fileName 			  = fileName.toLowerCase(Locale.getDefault());
-		resourceID  		  = getResources().getIdentifier(fileName, "drawable", getPackageName());
+			Bitmap bmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
+			bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth(), bmp.getHeight(), false); 
+			BitmapDrawable bd = new BitmapDrawable(this.getResources(), bmp);
+			bd.setAntiAlias(false);
 
-		Bitmap bmp = BitmapFactory.decodeResource(this.getResources(), resourceID);
-		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth(), bmp.getHeight(), false); 
-		BitmapDrawable bd = new BitmapDrawable(this.getResources(), bmp);
-		bd.setAntiAlias(false);
+			deckView.getLayoutParams().height = bmp.getHeight();
+			deckView.getLayoutParams().width = bmp.getWidth();
+			deckView.requestLayout();
+			deckView.setImageDrawable(bd);
 
-		deckView.getLayoutParams().height = bmp.getHeight();
-		deckView.getLayoutParams().width = bmp.getWidth();
-		deckView.requestLayout();
-		deckView.setImageDrawable(bd);
+			moves++;
+			updateArray();
+			updateComputerArray();
+			checkScoreUpdateLabels();
+			updateTotal();
 
-		moves++;
-		updateArray();
-		updateComputerArray();
-		checkScoreUpdateLabels();
-		updateTotal();
+			//System.out.println("SHOWING COMPUTER GRID ITSELF");
+			//showAI();
 
-		//System.out.println("SHOWING COMPUTER GRID ITSELF");
-		//showAI();
-
-		// When the game ends...
-		if(moves==25) {
-			endGame();
+			// When the game ends...
+			if(moves==25) {
+				endGame();
+			}
 		}
 	}
 
@@ -339,7 +386,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 					// If the value exists, add it to a temporary list for the row/col
 					edu.gettysburg.ai.Card ca = computer.getGrid()[c][r];
 
-
 					// reverse the interpret
 					int newRank = ca.getRank()-1;
 					if(ca.getRank()==0)
@@ -403,14 +449,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 
 		if(computerScore > gameTotal) {
 			builder.setMessage("Game Over! \n" + userName + ", you lose!" + " \nYour score was " + gameTotal 
-			+ "\n" + "Computer score was " + computerScore);
+					+ "\n" + "Computer score was " + computerScore);
 		} else if(computerScore == gameTotal) {
 			builder.setMessage("Game Over! \n" + userName + ", you tied!" + " \nYour score was " + gameTotal 
-			+ "\n" + "Computer score was " + computerScore);
+					+ "\n" + "Computer score was " + computerScore);
 		}
 		else {
 			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + gameTotal
-			+ "\n" + "Computer score was " + computerScore);
+					+ "\n" + "Computer score was " + computerScore);
 		}
 
 		AlertDialog alert = builder.create();
@@ -457,9 +503,11 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 	 * Could easily implement a British scoring system option in the future...
 	 */
 	public void checkScoreUpdateLabels() {
+
 		for(int i=0; i<places.size(); i++) {
 			List<Card> tmp = places.get(i);
 			int sectionTotal = 0;
+			//boolean scored = false;
 
 			if(tmp.size()==5 && Card.isRoyalFlush(tmp)) {
 				sectionTotal+=100;
@@ -488,9 +536,25 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 			else if(tmp.size()>=2 && Card.hasPair(tmp)) {
 				sectionTotal+=2;
 			}
+			/*if(sectionTotal > 0) { scored = true; }
+			if(scored) {
+				for(Card c: tmp) {
+					Iterator it = map.entrySet().iterator();
+					while (it.hasNext()) {
+						Map.Entry pair = (Map.Entry)it.next();
+						//System.out.println(pair.getKey() + " = " + pair.getValue());
+						ImageView img = (ImageView) pair.getValue();
+						
+						it.remove(); // avoids a ConcurrentModificationException
+					}
+					System.out.println(c.toString());
+				}
+			}
+			*/
 
 			textMap.get("view"+ i).setText(String.valueOf(sectionTotal));
 		}
+
 	}
 
 	public void checkScoreUpdateLabelsComputer() {
@@ -865,7 +929,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnTo
 		switch(action & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_POINTER_DOWN:
 			// multi-touch!! - touch down
-			//int count = event.getPointerCount(); // Number of 'fingers' in this time
+			int count = event.getPointerCount(); // Number of 'fingers' in this time
+			System.out.println(count);
 			break;
 		}
 		return true;

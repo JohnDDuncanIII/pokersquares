@@ -25,11 +25,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
@@ -92,8 +94,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			copyAssets();
 			e.printStackTrace();
 		}
-
-		// Get the profont front from the assets folder
+		// Get the profont font from the assets folder
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
 
 		// Get resources for all of the vertical + horizontal textViews, then add it to the hashMap of textViews using its ID as the key
@@ -126,7 +127,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		// create computer AI player
 		NARLPokerSquaresPlayer player = new NARLPokerSquaresPlayer();
 		computer = new newPokerSquares(player, 60000, edu.gettysburg.ai.Card.interpret(deckCopy));
-
 		//startService(new Intent(this, bgService.class).putExtra("deck", deck));
 
 		// For clarity on colored backgrounds...
@@ -141,7 +141,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			for(int c=1; c<6; c++) {
 				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
 				ImageView toAdd = (ImageView) findViewById(resourceID);
-				//toAdd.setOnDragListener(l);
 				toAdd.setOnClickListener(this);
 				map.put("r" + r + "c" + c, toAdd);
 
@@ -154,55 +153,110 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				initialCur.setAntiAlias(false);
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
-				toAdd.requestLayout();
-
 				toAdd.setImageDrawable(initialCur);
 
-
 				toAdd.setOnDragListener(new View.OnDragListener() {
-					//View draggedView;
 					@Override
 					public boolean onDrag(View v, DragEvent event) {
-						switch (event.getAction()) {
-						case DragEvent.ACTION_DRAG_STARTED:
-							//draggedView = (View) event.getLocalState();
-							//draggedView.setVisibility(View.INVISIBLE);
-							break;
-						case DragEvent.ACTION_DRAG_ENTERED:
-							break;
-						case DragEvent.ACTION_DRAG_EXITED:
-							break;
-						case DragEvent.ACTION_DROP:
-							//ImageView view = (ImageView) event.getLocalState();
-							//view.setVisibility(View.INVISIBLE);
-							//v.setVisibility(View.INVISIBLE);
-							onClick(v);
-							break;
-						case DragEvent.ACTION_DRAG_ENDED:
-							//draggedView.setVisibility(View.VISIBLE);
-							break;
-						default:
-							break;
+						if(!isShowingAI) {
+							switch (event.getAction()) {
+							case DragEvent.ACTION_DRAG_STARTED:
+								break;
+							case DragEvent.ACTION_DRAG_ENTERED:
+								v.setPadding(1, 1, 1, 1);
+								v.setBackgroundColor(Color.WHITE);
+								break;
+							case DragEvent.ACTION_DRAG_EXITED:
+								v.setPadding(0,0,0,0);
+								break;
+							case DragEvent.ACTION_DROP:
+								//ImageView view = (ImageView) event.getLocalState();
+								//view.setVisibility(View.INVISIBLE);
+								v.setPadding(0,0,0,0);
+								if(v.isClickable()) {
+									onClick(v);
+									System.out.println("The imageview " + v.getId() + " can be clicked");
+									return true;
+								} else {
+									System.out.println("The imageview " + v.getId() + " cannot be clicked");
+									return false;
+								}
+							case DragEvent.ACTION_DRAG_ENDED:
+								break;
+							default:
+								break;
+							}
 						}
+						
 						return true;
 					}
 
 				});
-
-
 				counter++;
 			}
 		}
 
+		final Resources res = this.getResources();
 		// Get resource for the deckView, then pop the first card off of the stack and set the top of the deckView equal to the cards resource in /res
 		deckView 		= (ImageView) findViewById(R.id.deckView);
+		deckView.setOnDragListener(new View.OnDragListener() {
+			ImageView deckView;
+			Drawable backupView;
+
+			@Override
+			public boolean onDrag(View v, DragEvent event) {
+				if(!isShowingAI) {
+					switch (event.getAction()) {
+					case DragEvent.ACTION_DRAG_STARTED:
+						deckView = (ImageView) event.getLocalState();
+						backupView = deckView.getDrawable().getConstantState().newDrawable();
+						Bitmap initialBmp = BitmapFactory.decodeResource(res, R.drawable.toprbvert);
+						initialBmp = Bitmap.createScaledBitmap(initialBmp, initialBmp.getWidth(), initialBmp.getHeight(), false); 
+						final BitmapDrawable initialCur = new BitmapDrawable(res, initialBmp);
+						initialCur.setAntiAlias(false);
+						deckView.getLayoutParams().height = initialBmp.getHeight();
+						deckView.getLayoutParams().width = initialBmp.getWidth();
+						deckView.setImageDrawable(initialCur);
+						break;
+					case DragEvent.ACTION_DRAG_ENTERED:
+						break;
+					case DragEvent.ACTION_DRAG_EXITED:
+						break;
+					case DragEvent.ACTION_DROP:
+						if(v.isClickable()) {
+							System.out.println("The imageview " + v.getId() + " can be clicked");
+							return true;
+						} else {
+							System.out.println("The imageview " + v.getId() + " cannot be clicked");
+							deckView.setImageDrawable(backupView);
+							return false;
+						}
+					case DragEvent.ACTION_DRAG_ENDED:
+						// The View object can call getResult() to see the result of the operation. 
+						// If a View returned true in response to ACTION_DROP, then getResult() returns true, 
+						//	otherwise it returns false. 
+						if(!event.getResult() ) {
+							System.out.println("The event returned false ");
+							deckView.setImageDrawable(backupView);
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				
+				return true;
+			}
+
+		});
+		
 		deckView.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
 					v.startDrag(null, shadowBuilder, v, 0);
-			        v.performClick();
+					v.performClick();
 					return true;
 				} else {
 					return false;
@@ -210,7 +264,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			}
 
 		});
-
+		
 		currentDeckCard = deck.pop();
 		String fileName = currentDeckCard.toString();
 		fileName		= fileName.toLowerCase(Locale.getDefault());
@@ -223,7 +277,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 		deckView.getLayoutParams().height = deckBmp.getHeight();
 		deckView.getLayoutParams().width = deckBmp.getWidth();
-		deckView.requestLayout();
 		deckView.setImageDrawable(deckCur);
 	}
 
@@ -264,7 +317,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 			currentView.getLayoutParams().height = gridBmp.getHeight();
 			currentView.getLayoutParams().width = gridBmp.getWidth();
-			currentView.requestLayout();
 
 			currentView.setImageDrawable(bdCur);
 			currentView.setClickable(false);
@@ -283,7 +335,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 			deckView.getLayoutParams().height = bmp.getHeight();
 			deckView.getLayoutParams().width = bmp.getWidth();
-			deckView.requestLayout();
 			deckView.setImageDrawable(bd);
 
 			moves++;
@@ -291,9 +342,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			updateComputerArray();
 			checkScoreUpdateLabels();
 			updateTotal();
-
-			//System.out.println("SHOWING COMPUTER GRID ITSELF");
-			//showAI();
 
 			// When the game ends...
 			if(moves==25) {
@@ -309,7 +357,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	private void updateArray(){
 		List<Card> tmp = new LinkedList<Card>();
 		places = new ArrayList<List<Card>>(); 
-
 
 		// Get [rows][cols]
 		for (int r=0; r<array.length; r++) {
@@ -334,7 +381,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			places.add(tmp);
 			tmp = new LinkedList<Card>();
 		}
-
 
 		// Sort all of the temporary lists (since our Card class implements Comparable)
 		for (int i=0; i<places.size(); i++) {
@@ -362,7 +408,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				if(computer.getGrid()[r][c] != null) {
 					// If the value exists, add it to a temporary list for the row/col
 					edu.gettysburg.ai.Card ca = computer.getGrid()[r][c];
-
 					// reverse the interpret
 					int newRank = ca.getRank()-1;
 					if(ca.getRank()==0)
@@ -385,7 +430,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				if(computer.getGrid()[c][r] != null) {
 					// If the value exists, add it to a temporary list for the row/col
 					edu.gettysburg.ai.Card ca = computer.getGrid()[c][r];
-
 					// reverse the interpret
 					int newRank = ca.getRank()-1;
 					if(ca.getRank()==0)
@@ -417,12 +461,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		updateTotal();
 		showAI();
 		checkScoreUpdateLabelsComputer();
-		//int userGameTotal = 
 		updateComputerTotal();
 
-		if(userName.equals("")) {
-			userName = "Bud";
-		}
+		if(userName.equals("")) { userName = "Player"; }
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder       
@@ -458,16 +499,14 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + gameTotal
 					+ "\n" + "Computer score was " + computerScore);
 		}
-
+		
 		AlertDialog alert = builder.create();
-
 		Window window = alert.getWindow();
 		WindowManager.LayoutParams wlp = window.getAttributes();
 
 		wlp.gravity = Gravity.BOTTOM;
 		wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 		window.setAttributes(wlp);
-
 		alert.show();
 	}
 
@@ -503,7 +542,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	 * Could easily implement a British scoring system option in the future...
 	 */
 	public void checkScoreUpdateLabels() {
-
 		for(int i=0; i<places.size(); i++) {
 			List<Card> tmp = places.get(i);
 			int sectionTotal = 0;
@@ -544,17 +582,16 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 						Map.Entry pair = (Map.Entry)it.next();
 						//System.out.println(pair.getKey() + " = " + pair.getValue());
 						ImageView img = (ImageView) pair.getValue();
-						
+
 						it.remove(); // avoids a ConcurrentModificationException
 					}
 					System.out.println(c.toString());
 				}
 			}
-			*/
+			 */
 
 			textMap.get("view"+ i).setText(String.valueOf(sectionTotal));
 		}
-
 	}
 
 	public void checkScoreUpdateLabelsComputer() {
@@ -649,20 +686,16 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		case R.id.show_AI:
 			if(isAllowedToShow) {
 				if(isShowingAI) {
-
 					removeAI();
 					item.setTitle("Show AI");
 					checkScoreUpdateLabels();
 					updateTotal();
 				}
 				else {
-
 					showAI();
 					item.setTitle("Hide AI");
 					checkScoreUpdateLabelsComputer();
 					updateComputerTotal();
-
-
 				}
 				isShowingAI = !isShowingAI;
 			}
@@ -699,13 +732,11 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	public void showAI() {
 		edu.gettysburg.ai.Card[][] grid = computer.getGrid();
 
-		/*
-		for (int j = 0; j<grid[0].length; j++){
+		/*for (int j = 0; j<grid[0].length; j++){
 			for (int i = 0; i<grid.length; i++){
 				System.out.println(grid[j][i]);
 			}
-		}
-		 */
+		}*/
 		isAllowedToShow = false;
 		int internalCounter = 0;
 		int counter = 0;
@@ -771,7 +802,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 								runOnUiThread(new Runnable() {
 									public void run() {
 										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-										toAdd.requestLayout();
 										toAdd.setImageDrawable(initialCur);
 										if(c == 5) {
 											isAllowedToShow = true;
@@ -779,20 +809,14 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 										}
 									}
 								});
-
-
 							}
 						}).start();
-
 					}
 				}, delay);
-				if(row % 5 == 0)
-					delay += 150;
-
+				if(row % 5 == 0) { delay += 150; }
 				internalCounter++;
 			}
 			counter++;
-
 		}
 	}
 
@@ -864,7 +888,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 								runOnUiThread(new Runnable() {
 									public void run() {
 										// http://stackoverflow.com/questions/7785649/creating-a-3d-flip-animation-in-android-using-xml
-										toAdd.requestLayout();
 										toAdd.setImageDrawable(initialCur);
 
 										if(isAllowedToPressLocal){
@@ -879,9 +902,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 						}).start();
 					}
 				}, delay);
-				if(row % 5 == 0)
-					delay += 150;
-
+				if(row % 5 == 0) { delay += 150; }
 				internalCounter++; // we want to increase rows
 				cardFaceCounter++;
 			}

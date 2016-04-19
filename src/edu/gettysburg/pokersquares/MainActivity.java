@@ -1,9 +1,15 @@
 package edu.gettysburg.pokersquares;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,7 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	private boolean						isShowingAI = false;
 	private boolean 					isAllowedToPress = false;
 	private boolean						isAllowedToShow	= true;
-	private int 						moves   = 0, gameTotal = 0, computerScore = 0;
+	private int 						moves   = 0, gameTotal = 0, computerScore = 0, wins = 0, losses = 0, ties;
 	private MediaPlayer 				mp      = new MediaPlayer();
 	private String						userName = "";
 	newPokerSquares computer;
@@ -93,6 +99,22 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			copyAssets();
 			e.printStackTrace();
 		}
+		
+		String FILENAME = "data.txt";
+		try {
+			FileInputStream fis = openFileInput(FILENAME);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+			wins = Integer.valueOf(reader.readLine());
+			losses = Integer.valueOf(reader.readLine());
+			ties = Integer.valueOf(reader.readLine());
+		} catch (FileNotFoundException e) {
+			System.err.println("File " + FILENAME + " does not exist");
+		} catch (IOException e) {
+			System.err.println("Error on reading data from " + FILENAME);
+			e.printStackTrace();
+		}
+		
+		
 		// Get the profont font from the assets folder
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
 
@@ -466,13 +488,31 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		if(computerScore > gameTotal) {
 			builder.setMessage("Game Over! \n" + userName + ", you lose!" + " \nYour score was " + gameTotal 
 					+ "\n" + "Computer score was " + computerScore);
+			losses++;
 		} else if(computerScore == gameTotal) {
 			builder.setMessage("Game Over! \n" + userName + ", you tied!" + " \nYour score was " + gameTotal 
 					+ "\n" + "Computer score was " + computerScore);
+			ties++;
 		} else {
 			builder.setMessage("Game Over! \n" + userName + ", you win!" + " \nYour score was " + gameTotal
 					+ "\n" + "Computer score was " + computerScore);
+			wins++;
 		}
+		
+		String FILENAME = "data.txt";
+		FileOutputStream fos = null;
+
+		try {
+			fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+			writer.write(String.valueOf(wins));
+			writer.newLine();
+			writer.write(String.valueOf(losses));
+			writer.newLine();
+			writer.write(String.valueOf(ties));
+			writer.flush();
+			fos.close();
+		} catch (IOException e) { e.printStackTrace(); }
 
 		AlertDialog alert = builder.create();
 		Window window = alert.getWindow();
@@ -637,8 +677,20 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			}
 			return true;
 		case R.id.about:
+			Toast.makeText(getApplicationContext(), 
+					"Created by John D. Duncan, III as a "
+					+ "Gettysburg College Association for "
+					+ "Computing Machinery undergrad project.\n"
+					+ "AI Player created by Dr. Todd W. Neller of "
+					+ "the Gettysburg College Computer Science faculty.",
+					Toast.LENGTH_LONG).show();
 			return true;
 		case R.id.stats:
+			Toast.makeText(getApplicationContext(), 
+					"Wins: " + wins + "\n" + 
+					"Losses: " + losses + "\n" + 
+					"Ties: " + ties,
+					Toast.LENGTH_LONG).show();
 			return true;
 		case R.id.mute:
 			if(isMuted) {

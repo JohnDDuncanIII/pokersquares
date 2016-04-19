@@ -1,6 +1,6 @@
 Poker Squares
 -------------------------------
-This is a Gettysburg College ACM chapter project. It is an android application version of the game, Poker Squares. Contributors to this project include Professor Todd Neller, John Duncan, and all of the students who collaborated on the PokerSquares AI player during the Poker Squares AI competition which took place in the Spring 2013 semester at Gettysbug College.
+This is a Gettysburg College ACM chapter project. It is an android application version of the game Poker Squares. Contributors to this project include John Duncan, Professor Todd Neller, and all of the students who collaborated on the PokerSquares AI player during the Poker Squares AI competition which took place in the Spring 2013 semester at Gettysbug College.
 
 Features
 -------------------------------
@@ -8,6 +8,8 @@ Features
 * Minimal Application Size
 * Simple yet intuitive game controls
 * No advertisements or bloat
+* Cool animations
+* Expert AI player that plays alongside you
 
 APK Download
 -------------------------------
@@ -17,16 +19,13 @@ Get it [here](https://github.com/JohnDDuncanIII/PokerSquares/blob/master/bin/Pok
 Current Development Screenshots
 -------------------------------
 
-![Introductory Menu](http://goput.it/u3ey.png)
-![Beginning](http://goput.it/sw64.png)
-![In Action](http://goput.it/bxpz.png)
-![End Game](http://goput.it/mxsa.png)
-
-If using eclipse, right click on your java project and selecte Properties->Java Build Path->Libraries->Add External Jars
-
-==========
-
-***
+![Introductory Menu](screenshots/splash.png)
+![Empty](screenshots/empty.png)
+![Intro Player](screenshots/intro_player.png)
+![Intro Computer](screenshots/intro_computer.png)
+![Player](screenshots/player.png)
+![Comp](screenshots/comp.png)
+![End](screenshots/end.png)
 
 Sources
 -------------------------------

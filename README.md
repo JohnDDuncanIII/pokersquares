@@ -23,6 +23,7 @@ Current Development Screenshots
 ![Empty](screenshots/empty.png)
 ![Intro Player](screenshots/intro_player.png)
 ![Intro Computer](screenshots/intro_computer.png)
+![Hover](screenshots/hover.png)
 ![Player](screenshots/player.png)
 ![Comp](screenshots/comp.png)
 ![End](screenshots/end.png)

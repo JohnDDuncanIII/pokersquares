@@ -110,7 +110,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 		// set DPI-independent padding for the first linera layout (holding all of the horizontal text views)
 		View tmp = (View) findViewById (getResources().getIdentifier("linearlayout0", "id", getPackageName()));
-		tmp.setPadding(75, 0, 0, 0);
+		tmp.setPadding(90, 0, 0, 0);
 
 		// instantiate and set the typeface for the text total objects
 		textTotal 		 = (TextView) findViewById(R.id.textTotal);
@@ -168,11 +168,13 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 								break;
 							case DragEvent.ACTION_DRAG_EXITED:
 								v.setPadding(0,0,0,0);
+								v.setBackgroundColor(Color.TRANSPARENT);
 								break;
 							case DragEvent.ACTION_DROP:
 								//ImageView view = (ImageView) event.getLocalState();
 								//view.setVisibility(View.INVISIBLE);
 								v.setPadding(0,0,0,0);
+								v.setBackgroundColor(Color.TRANSPARENT);
 								if(v.isClickable()) {
 									onClick(v);
 									System.out.println("The imageview " + v.getId() + " can be clicked");
@@ -224,10 +226,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 						break;
 					case DragEvent.ACTION_DROP:
 						if(v.isClickable()) {
-							System.out.println("The imageview " + v.getId() + " can be clicked");
+							//System.out.println("The imageview " + v.getId() + " can be clicked");
 							return true;
 						} else {
-							System.out.println("The imageview " + v.getId() + " cannot be clicked");
+							//System.out.println("The imageview " + v.getId() + " cannot be clicked");
 							deckView.setImageDrawable(backupView);
 							return false;
 						}

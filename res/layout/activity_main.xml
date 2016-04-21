@@ -87,7 +87,7 @@
             android:id="@+id/r1c1"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/card_description"
             android:src="@drawable/topbvert" />
         
@@ -95,7 +95,7 @@
             android:id="@+id/r1c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/card_description"
             android:src="@drawable/toprvert" />
         
@@ -103,7 +103,7 @@
             android:id="@+id/r1c3"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -111,7 +111,7 @@
             android:id="@+id/r1c4"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -119,7 +119,7 @@
             android:id="@+id/r1c5"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -146,7 +146,7 @@
             android:id="@+id/r2c1"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -154,7 +154,7 @@
             android:id="@+id/r2c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -162,7 +162,7 @@
             android:id="@+id/r2c3"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -170,7 +170,7 @@
             android:id="@+id/r2c4"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -178,7 +178,7 @@
             android:id="@+id/r2c5"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
     </LinearLayout>
@@ -205,7 +205,7 @@
             android:id="@+id/r3c1"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -213,7 +213,7 @@
             android:id="@+id/r3c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -221,7 +221,7 @@
             android:id="@+id/r3c3"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -229,7 +229,7 @@
             android:id="@+id/r3c4"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -237,7 +237,7 @@
             android:id="@+id/r3c5"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
     </LinearLayout>
@@ -263,7 +263,7 @@
             android:id="@+id/r4c1"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -271,7 +271,7 @@
             android:id="@+id/r4c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -279,7 +279,7 @@
             android:id="@+id/r4c3"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -287,7 +287,7 @@
             android:id="@+id/r4c4"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -295,7 +295,7 @@
             android:id="@+id/r4c5"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
     </LinearLayout>
@@ -321,7 +321,7 @@
             android:id="@+id/r5c1"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -329,7 +329,7 @@
             android:id="@+id/r5c2"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -337,7 +337,7 @@
             android:id="@+id/r5c3"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -345,7 +345,7 @@
             android:id="@+id/r5c4"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/toprvert" 
             android:contentDescription="@string/card_description"/>
 
@@ -353,7 +353,7 @@
             android:id="@+id/r5c5"
             android:layout_width="54dp"
             android:layout_height="72dp"
-            android:background="#80000000"
+            android:background="@android:color/transparent"
             android:src="@drawable/topbvert" 
             android:contentDescription="@string/card_description"/>
     </LinearLayout>

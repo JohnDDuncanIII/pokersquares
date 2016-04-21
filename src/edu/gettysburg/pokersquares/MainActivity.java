@@ -35,6 +35,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +46,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
+import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -68,7 +70,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	private boolean						isShowingAI = false;
 	private boolean 					isAllowedToPress = false;
 	private boolean						isAllowedToShow	= true;
-	private int 						moves   = 0, gameTotal = 0, computerScore = 0, wins = 0, losses = 0, ties;
+	private int 						moves   = 0, gameTotal = 0, computerScore = 0, wins = 0, losses = 0, ties = 0, highestScore = 0;
 	private MediaPlayer 				mp      = new MediaPlayer();
 	private String						userName = "";
 	newPokerSquares computer;
@@ -99,7 +101,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			copyAssets();
 			e.printStackTrace();
 		}
-		
+
 		String FILENAME = "data.txt";
 		try {
 			FileInputStream fis = openFileInput(FILENAME);
@@ -107,14 +109,15 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			wins = Integer.valueOf(reader.readLine());
 			losses = Integer.valueOf(reader.readLine());
 			ties = Integer.valueOf(reader.readLine());
+			highestScore = Integer.valueOf(reader.readLine());
 		} catch (FileNotFoundException e) {
 			System.err.println("File " + FILENAME + " does not exist");
 		} catch (IOException e) {
 			System.err.println("Error on reading data from " + FILENAME);
 			e.printStackTrace();
 		}
-		
-		
+
+
 		// Get the profont font from the assets folder
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
 
@@ -164,6 +167,34 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
 				ImageView toAdd = (ImageView) findViewById(resourceID);
 				toAdd.setOnClickListener(this);
+				//toAdd.setCropToPadding(false);
+
+				toAdd.setOnTouchListener(new OnTouchListener() {
+			        private Rect rect;
+
+			        @Override
+			        public boolean onTouch(View v, MotionEvent event) {
+			            ImageView img = (ImageView) v;
+			        	if(event.getAction() == MotionEvent.ACTION_DOWN){
+			                if(v.isClickable()) {
+			                	img.setColorFilter(Color.argb(50, 0, 0, 0));
+				                rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+			                }
+			            }
+			            if(event.getAction() == MotionEvent.ACTION_UP){
+			                img.setColorFilter(Color.argb(0, 0, 0, 0));
+			                v.performClick();
+			            }
+			            if(event.getAction() == MotionEvent.ACTION_MOVE){
+			                if(!rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
+			                	img.setColorFilter(Color.argb(0, 0, 0, 0));
+			                } 
+			            }
+			           
+			            return false;
+			        }
+				});
+
 				map.put("r" + r + "c" + c, toAdd);
 
 				// dope ternary - you = jealous 
@@ -176,7 +207,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				toAdd.setImageDrawable(initialCur);
-
+				
 				toAdd.setOnDragListener(new View.OnDragListener() {
 					@Override
 					public boolean onDrag(View v, DragEvent event) {
@@ -185,11 +216,17 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 							case DragEvent.ACTION_DRAG_STARTED: break;
 							case DragEvent.ACTION_DRAG_ENTERED:
 								if(v.isClickable()) {
+									/*LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+									lp.setMargins(1, 1, 1, 1);
+									v.setLayoutParams(lp);*/
 									v.setPadding(1, 1, 1, 1);
 									v.setBackgroundColor(Color.WHITE);
 								}
 								break;
 							case DragEvent.ACTION_DRAG_EXITED:
+								/*LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+								lp.setMargins(0, 0, 0, 0);
+								v.setLayoutParams(lp);*/
 								v.setPadding(0,0,0,0);
 								v.setBackgroundColor(Color.TRANSPARENT);
 								break;
@@ -498,7 +535,11 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 					+ "\n" + "Computer score was " + computerScore);
 			wins++;
 		}
-		
+
+		if(gameTotal > highestScore) {
+			highestScore = gameTotal;
+		}
+
 		String FILENAME = "data.txt";
 		FileOutputStream fos = null;
 
@@ -510,6 +551,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			writer.write(String.valueOf(losses));
 			writer.newLine();
 			writer.write(String.valueOf(ties));
+			writer.newLine();
+			writer.write(String.valueOf(highestScore));
 			writer.flush();
 			fos.close();
 		} catch (IOException e) { e.printStackTrace(); }
@@ -545,7 +588,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 						public void onCompletion(MediaPlayer mediaplayer) {
 							mediaplayer.stop();
 							mediaplayer.release();
-							
+
 						}});
 					mp.start();
 				}}}).start();
@@ -679,18 +722,20 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		case R.id.about:
 			Toast.makeText(getApplicationContext(), 
 					"Created by John D. Duncan, III as a "
-					+ "Gettysburg College Association for "
-					+ "Computing Machinery undergrad project.\n"
-					+ "AI Player created by Dr. Todd W. Neller of "
-					+ "the Gettysburg College Computer Science faculty.",
-					Toast.LENGTH_LONG).show();
+							+ "Gettysburg College Association for "
+							+ "Computing Machinery undergrad project.\n"
+							+ "AI Player created by Dr. Todd W. Neller of "
+							+ "the Gettysburg College Computer Science faculty.",
+							Toast.LENGTH_LONG).show();
 			return true;
 		case R.id.stats:
 			Toast.makeText(getApplicationContext(), 
 					"Wins: " + wins + "\n" + 
-					"Losses: " + losses + "\n" + 
-					"Ties: " + ties,
-					Toast.LENGTH_LONG).show();
+							"Losses: " + losses + "\n" + 
+							"Ties: " + ties + "\n" +
+							"Win Average: " + roundTD((double)((double)wins / (wins+losses+ties))*100) + "%\n" +
+							"Highest Score: " + highestScore,
+							Toast.LENGTH_LONG).show();
 			return true;
 		case R.id.mute:
 			if(isMuted) {
@@ -950,5 +995,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		while((read = in.read(buffer)) != -1){
 			out.write(buffer, 0, read);
 		}
+	}
+	public double roundTD(double d) {
+		d = Math.round(d * 100);
+		d = d/100;
+		return d;
 	}
 }

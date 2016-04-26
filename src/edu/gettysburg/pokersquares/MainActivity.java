@@ -72,6 +72,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	private boolean						isAllowedToShow	= true;
 	private int 						moves   = 0, gameTotal = 0, computerScore = 0, wins = 0, losses = 0, ties = 0, highestScore = 0;
 	private MediaPlayer 				mp      = new MediaPlayer();
+	private Menu 						menu = null;
 	private String						userName = "";
 	newPokerSquares computer;
 
@@ -81,14 +82,19 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	private int mode = NONE;
 	private float startY;
 	private float stopY;
+	private float startX;
+	private float stopX;
 	// We will only detect a swipe if the difference is at least 100 pixels
 	// Change this value to your needs
-	private static final int TRESHOLD = 100;
+	private static final int TRESHOLD = 75;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		View contentView = (View)findViewById(R.id.RelativeLayout1);
+		contentView.setOnTouchListener((View.OnTouchListener)this);
+
 		//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
 		// Get userName from SplashScreen activity
@@ -101,8 +107,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			copyAssets();
 			e.printStackTrace();
 		}
-
-		String FILENAME = "data.txt";
+		if(userName.equals("")) { userName = "Player"; }
+		String FILENAME = userName+".txt";
 		try {
 			FileInputStream fis = openFileInput(FILENAME);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
@@ -110,13 +116,13 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			losses = Integer.valueOf(reader.readLine());
 			ties = Integer.valueOf(reader.readLine());
 			highestScore = Integer.valueOf(reader.readLine());
+			isMuted = Boolean.valueOf(reader.readLine());
 		} catch (FileNotFoundException e) {
 			System.err.println("File " + FILENAME + " does not exist");
 		} catch (IOException e) {
 			System.err.println("Error on reading data from " + FILENAME);
 			e.printStackTrace();
 		}
-
 
 		// Get the profont font from the assets folder
 		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/ProFontWindows.ttf");
@@ -129,6 +135,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			if(i>=5) toAdd.setWidth(70);
 			toAdd.getPaint().setAntiAlias(false);
 			toAdd.setTypeface(tf);
+			toAdd.setTextSize(12);
 			//toAdd.setTextSize(12);
 			textMap.put("view"+i, toAdd);
 		}
@@ -166,33 +173,33 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			for(int c=1; c<6; c++) {
 				int resourceID 	= getResources().getIdentifier("r" + r + "c" + c, "id", getPackageName());
 				ImageView toAdd = (ImageView) findViewById(resourceID);
-				toAdd.setOnClickListener(this);
+				toAdd.setOnClickListener((View.OnClickListener)this);
 				//toAdd.setCropToPadding(false);
 
 				toAdd.setOnTouchListener(new OnTouchListener() {
-			        private Rect rect;
+					private Rect rect;
 
-			        @Override
-			        public boolean onTouch(View v, MotionEvent event) {
-			            ImageView img = (ImageView) v;
-			        	if(event.getAction() == MotionEvent.ACTION_DOWN){
-			                if(v.isClickable()) {
-			                	img.setColorFilter(Color.argb(50, 0, 0, 0));
-				                rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-			                }
-			            }
-			            if(event.getAction() == MotionEvent.ACTION_UP){
-			                img.setColorFilter(Color.argb(0, 0, 0, 0));
-			                v.performClick();
-			            }
-			            if(event.getAction() == MotionEvent.ACTION_MOVE){
-			                if(!rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
-			                	img.setColorFilter(Color.argb(0, 0, 0, 0));
-			                } 
-			            }
-			           
-			            return false;
-			        }
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+						ImageView img = (ImageView) v;
+						if(event.getAction() == MotionEvent.ACTION_DOWN){
+							if(v.isClickable()) {
+								img.setColorFilter(Color.argb(50, 0, 0, 0));
+								rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+							}
+						}
+						if(event.getAction() == MotionEvent.ACTION_UP){
+							img.setColorFilter(Color.argb(0, 0, 0, 0));
+							v.performClick();
+						}
+						if(event.getAction() == MotionEvent.ACTION_MOVE){
+							if(!rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
+								img.setColorFilter(Color.argb(0, 0, 0, 0));
+							} 
+						}
+
+						return false;
+					}
 				});
 
 				map.put("r" + r + "c" + c, toAdd);
@@ -207,7 +214,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				toAdd.getLayoutParams().height = initialBmp.getHeight();
 				toAdd.getLayoutParams().width = initialBmp.getWidth();
 				toAdd.setImageDrawable(initialCur);
-				
+
 				toAdd.setOnDragListener(new View.OnDragListener() {
 					@Override
 					public boolean onDrag(View v, DragEvent event) {
@@ -323,6 +330,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		deckView.getLayoutParams().height = deckBmp.getHeight();
 		deckView.getLayoutParams().width = deckBmp.getWidth();
 		deckView.setImageDrawable(deckCur);
+
 	}
 
 	/**
@@ -497,7 +505,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		showAI();
 		checkScoreUpdateLabels(computerPlaces);
 		updateComputerTotal();
-		if(userName.equals("")) { userName = "Player"; }
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder       
@@ -540,7 +547,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			highestScore = gameTotal;
 		}
 
-		String FILENAME = "data.txt";
+		String FILENAME = userName+".txt";
 		FileOutputStream fos = null;
 
 		try {
@@ -553,6 +560,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			writer.write(String.valueOf(ties));
 			writer.newLine();
 			writer.write(String.valueOf(highestScore));
+			writer.newLine();
+			writer.write(String.valueOf(isMuted));
 			writer.flush();
 			fos.close();
 		} catch (IOException e) { e.printStackTrace(); }
@@ -671,6 +680,24 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	 */
 	@Override
 	public void onBackPressed() {
+		String FILENAME = userName+".txt";
+		FileOutputStream fos = null;
+
+		try {
+			fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+			writer.write(String.valueOf(wins));
+			writer.newLine();
+			writer.write(String.valueOf(losses));
+			writer.newLine();
+			writer.write(String.valueOf(ties));
+			writer.newLine();
+			writer.write(String.valueOf(highestScore));
+			writer.newLine();
+			writer.write(String.valueOf(isMuted));
+			writer.flush();
+			fos.close();
+		} catch (IOException e) { e.printStackTrace(); }
 		Intent intent = new Intent(Intent.ACTION_MAIN);
 		intent.addCategory(Intent.CATEGORY_HOME);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -758,6 +785,21 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.my_options_menu, menu);
+		super.onCreateOptionsMenu(menu);
+		this.menu = menu;
+
+		if(isMuted){
+			menu.findItem(R.id.mute).setTitle("Un-mute");
+		} else {
+			menu.findItem(R.id.mute).setTitle("Mute");
+		}
+		
+		if(isShowingAI) {
+			menu.findItem(R.id.show_AI).setTitle("Hide AI");
+		} else {
+			menu.findItem(R.id.show_AI).setTitle("Show AI");
+		}
+
 		return true;
 	}
 
@@ -934,37 +976,55 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			mode = SWIPE;
 			// You can also use event.getY(1) or the average of the two
 			startY = event.getY(0);
+			startX = event.getX(0);
 			break;
 		case MotionEvent.ACTION_POINTER_UP:
 			// This happens when you release the second finger
 			mode = NONE;
-			if(Math.abs(startY - stopY) > TRESHOLD) {
+			if((Math.abs(startY - stopY) > TRESHOLD) ) {
 				if(startY > stopY) {
 					System.out.println("SWIPING UP");
 				}
 				else {
 					System.out.println("SWIPING DOWN");
 				}
+
 			}
+			if((Math.abs(startX - stopX) > TRESHOLD)) {
+				if(isAllowedToShow) {
+					MenuItem showAIButton = null;
+					if(menu != null) {
+						showAIButton = menu.findItem(R.id.show_AI);
+					}
+					
+					if((startX < stopX) && !isShowingAI) {
+						showAI(); 
+						if(showAIButton != null) {
+							showAIButton.setTitle("Hide AI");
+						}
+						checkScoreUpdateLabels(computerPlaces);
+						updateComputerTotal();
+						isShowingAI = true;
+					} else if((startX > stopX) && isShowingAI){
+						removeAI();
+						if(showAIButton != null) {
+							showAIButton.setTitle("Show AI");
+						}
+						checkScoreUpdateLabels(places);
+						updateTotal();
+						isShowingAI = false;
+					}
+				}
+			}
+
 			this.mode = NONE;
 			v.performClick();
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if(mode == SWIPE) {
 				stopY = event.getY(0);
+				stopX = event.getX(0);
 			}
-			break;
-		}
-		return true;
-	}
-
-	public boolean onTouchEvent(MotionEvent event) {
-		int action = event.getAction();
-		switch(action & MotionEvent.ACTION_MASK) {
-		case MotionEvent.ACTION_POINTER_DOWN:
-			// multi-touch!! - touch down
-			int count = event.getPointerCount(); // Number of 'fingers' in this time
-			System.out.println(count);
 			break;
 		}
 		return true;
